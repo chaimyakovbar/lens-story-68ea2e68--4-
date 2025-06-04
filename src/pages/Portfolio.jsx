@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, ArrowRight } from "lucide-react"; // Removed Globe, it's in Layout
 import { Link, useLocation } from "react-router-dom";
@@ -21,67 +21,67 @@ export const portfolioItemsData = [
     id: "wedding",
     categoryKey: "wedding",
     image: img0031,
-    additionalImages: [],
+    folderPath: "wedding",
   },
   {
     id: "bar-mitzvah",
     categoryKey: "bar-mitzvah",
     image: img0032,
-    additionalImages: [],
+    folderPath: "bar-mitzvah",
   },
   {
     id: "bat-mitzvah",
     categoryKey: "bat-mitzvah",
     image: img0033,
-    additionalImages: [],
+    folderPath: "bat-mitzvah",
   },
   {
     id: "circumcision",
     categoryKey: "circumcision",
     image: img0035,
-    additionalImages: [],
+    folderPath: "circumcision",
   },
   {
     id: "tefilin",
     categoryKey: "tefilin",
     image: img0036,
-    additionalImages: [],
+    folderPath: "tefilin",
   },
   {
     id: "designs",
     categoryKey: "designs",
     image: img0037,
-    additionalImages: [],
+    folderPath: "designs",
   },
   {
     id: "business",
     categoryKey: "business",
     image: img0026,
-    additionalImages: [],
+    folderPath: "business",
   },
   {
     id: "haircut",
     categoryKey: "haircut",
     image: img0027,
-    additionalImages: [],
+    folderPath: "haircut",
   },
   {
     id: "porpusal",
     categoryKey: "porpusal",
     image: img0028,
-    additionalImages: [],
+    folderPath: "proposal",
   },
   {
     id: "engagement",
     categoryKey: "engagement",
     image: img0029,
-    additionalImages: [],
+    folderPath: "engagement",
   },
   {
     id: "torah",
     categoryKey: "torah",
     image: img0030,
-    additionalImages: [],
+    folderPath: "torah",
   },
 ];
 
@@ -109,7 +109,7 @@ const pageTranslations = {
     viewCollection: "View Collection",
     portfolioMeta: [
       {
-        title: "Wedding Photography",
+        title: "Wedding",
         description: "Capturing your special day with elegance and style",
       },
       {
@@ -137,7 +137,7 @@ const pageTranslations = {
         description: "Professional coverage for corporate gatherings",
       },
       {
-        title: "First Haircut Ceremony",
+        title: "First Haircut",
         description: "Documenting this traditional celebration",
       },
       {
@@ -145,11 +145,11 @@ const pageTranslations = {
         description: "Capturing the moment of a lifetime",
       },
       {
-        title: "Engagement Ceremony",
+        title: "Engagement",
         description: "Preserving the joy of commitment",
       },
       {
-        title: "Torah Ceremony",
+        title: "Torah",
         description: "Documenting spiritual celebrations",
       },
     ],
@@ -176,7 +176,7 @@ const pageTranslations = {
     viewCollection: "צפה באוסף",
     portfolioMeta: [
       {
-        title: "צילומי חתונה",
+        title: "חתונה",
         description: "תיעוד היום המיוחד שלכם באלגנטיות ובסטייל",
       },
       {
@@ -192,11 +192,11 @@ const pageTranslations = {
         description: "שימור רגעים יקרים במשפחה",
       },
       {
-        title: "טקס תפילין",
+        title: "תפילין",
         description: "תיעוד רגעים רוחניים ביראת כבוד",
       },
       {
-        title: "צילומי עיצוב",
+        title: "עיצוב",
         description: "הצגת קומפוזיציות אמנותיות ויצירתיות",
       },
       {
@@ -204,15 +204,15 @@ const pageTranslations = {
         description: "כיסוי מקצועי למפגשים עסקיים",
       },
       {
-        title: "טקס חלאקה",
+        title: "חלאקה",
         description: "תיעוד חגיגה מסורתית",
       },
       {
-        title: "צילומי הצעת נישואין",
+        title: "הצעת נישואין",
         description: "תיעוד הרגע המרגש",
       },
       {
-        title: "טקס אירוסין",
+        title: "אירוסין",
         description: "שימור שמחת ההתחייבות",
       },
       {
