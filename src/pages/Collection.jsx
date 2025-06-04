@@ -147,18 +147,38 @@ export default function Collection() {
     // Dynamically import all images from the collection's folder
     const importImages = async () => {
       try {
-        const imageContext = import.meta.glob(
-          "/src/assets/**/*.{jpg,jpeg,png}",
-          { eager: true }
-        );
+        console.log("Loading images for collection:", foundCollection);
+        console.log("Folder path:", foundCollection.folderPath);
+
+        const imageContext = import.meta.glob("../assets/**/*.{jpg,jpeg,png}", {
+          eager: true,
+        });
+
+        console.log("All available images:", Object.keys(imageContext));
+
         const folderImages = Object.entries(imageContext)
-          .filter(([path]) => path.includes(foundCollection.folderPath))
-          .map(([ module]) => module.default);
+          .filter(([path]) => {
+            console.log(
+              "Checking path:",
+              path,
+              "against folder:",
+              foundCollection.folderPath
+            );
+            return path.includes(foundCollection.folderPath);
+          })
+          .map(([path, module]) => {
+            console.log("Found matching image:", path);
+            return module.default;
+          });
+
+        console.log("Filtered images:", folderImages);
 
         // Filter out the header image if it exists in the folder
         const filteredImages = folderImages.filter(
           (img) => img !== foundCollection.image
         );
+
+        console.log("Final images to display:", filteredImages);
         setAdditionalImages(filteredImages);
       } catch (error) {
         console.error("Error loading images:", error);
