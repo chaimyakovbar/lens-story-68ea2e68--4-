@@ -24,19 +24,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 
 const layoutTranslations = {
-  en: {
-    home: "Home",
-    portfolio: "Portfolio",
-    about: "About",
-    contact: "Contact",
-    languageToggle: "עברית",
-  },
   he: {
     home: "בית",
     portfolio: "תיק עבודות",
     about: "אודות",
     contact: "צור קשר",
     languageToggle: "English",
+  },
+  en: {
+    home: "Home",
+    portfolio: "Portfolio",
+    about: "About",
+    contact: "Contact",
+    languageToggle: "עברית",
   },
 };
 

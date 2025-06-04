@@ -1,34 +1,87 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, ArrowRight } from "lucide-react"; // Removed Globe, it's in Layout
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import img0031 from "../assets/images/home/IMG-20250604-WA0031.jpg";
+import img0032 from "../assets/images/home/IMG-20250604-WA0032.jpg";
+import img0033 from "../assets/images/home/IMG-20250604-WA0033.jpg";
+import img0035 from "../assets/images/home/IMG-20250604-WA0035.jpg";
+import img0036 from "../assets/images/home/IMG-20250604-WA0036.jpg";
+import img0037 from "../assets/images/home/IMG-20250604-WA0037.jpg";
+import img0026 from "../assets/images/home/IMG-20250604-WA0026.jpg";
+import img0027 from "../assets/images/home/IMG-20250604-WA0027.jpg";
+import img0028 from "../assets/images/home/IMG-20250604-WA0028.jpg";
+import img0029 from "../assets/images/home/IMG-20250604-WA0029.jpg";
+import img0030 from "../assets/images/home/IMG-20250604-WA0030.jpg";
 
 // Base portfolio items with language-agnostic data
-export const portfolioItemsData = [ // Renamed to avoid conflict with component name
+export const portfolioItemsData = [
   {
-    id: "desert-wedding",
-    categoryKey: "Weddings", // Use a key for category lookup
-    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    additionalImages: [ /* ... */ ]
+    id: "wedding",
+    categoryKey: "wedding",
+    image: img0031,
+    additionalImages: [],
   },
   {
-    id: "fashion-week",
-    categoryKey: "Fashion",
-    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    additionalImages: [ /* ... */ ]
+    id: "bar-mitzvah",
+    categoryKey: "bar-mitzvah",
+    image: img0032,
+    additionalImages: [],
   },
   {
-    id: "mountain-vista",
-    categoryKey: "Nature",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    additionalImages: [ /* ... */ ]
+    id: "bat-mitzvah",
+    categoryKey: "bat-mitzvah",
+    image: img0033,
+    additionalImages: [],
   },
   {
-    id: "corporate-event",
-    categoryKey: "Events",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    additionalImages: [ /* ... */ ]
+    id: "circumcision",
+    categoryKey: "circumcision",
+    image: img0035,
+    additionalImages: [],
+  },
+  {
+    id: "tefilin",
+    categoryKey: "tefilin",
+    image: img0036,
+    additionalImages: [],
+  },
+  {
+    id: "designs",
+    categoryKey: "designs",
+    image: img0037,
+    additionalImages: [],
+  },
+  {
+    id: "business",
+    categoryKey: "business",
+    image: img0026,
+    additionalImages: [],
+  },
+  {
+    id: "haircut",
+    categoryKey: "haircut",
+    image: img0027,
+    additionalImages: [],
+  },
+  {
+    id: "porpusal",
+    categoryKey: "porpusal",
+    image: img0028,
+    additionalImages: [],
+  },
+  {
+    id: "engagement",
+    categoryKey: "engagement",
+    image: img0029,
+    additionalImages: [],
+  },
+  {
+    id: "torah",
+    categoryKey: "torah",
+    image: img0030,
+    additionalImages: [],
   },
 ];
 
@@ -37,59 +90,170 @@ const pageTranslations = {
   en: {
     title: "Our",
     titleHighlight: "Portfolio",
-    subtitle: "Explore our diverse collection of photographic work across various genres and styles.",
+    subtitle:
+      "Explore our diverse collection of photographic work across various genres and styles.",
     categories: {
       All: "All",
-      Weddings: "Weddings",
-      Events: "Events",
-      Fashion: "Fashion",
-      Nature: "Nature"
+      wedding: "Wedding",
+      "bar-mitzvah": "Bar Mitzvah",
+      "bat-mitzvah": "Bat Mitzvah",
+      circumcision: "Circumcision",
+      tefilin: "Tefilin",
+      designs: "Designs",
+      business: "Business",
+      haircut: "First Haircut",
+      porpusal: "Proposal",
+      engagement: "Engagement",
+      torah: "Torah",
     },
     viewCollection: "View Collection",
-    portfolioMeta: [ // Array of translated metadata, matching portfolioItemsData order
-      { title: "Desert Wedding", description: "An intimate celebration under the stars" },
-      { title: "Fashion Week", description: "High-end fashion photography from the runway" },
-      { title: "Mountain Vista", description: "Breathtaking landscapes from mountain peaks" },
-      { title: "Corporate Event", description: "Professional coverage of business gatherings" }
-    ]
+    portfolioMeta: [
+      {
+        title: "Wedding Photography",
+        description: "Capturing your special day with elegance and style",
+      },
+      {
+        title: "Bar Mitzvah",
+        description: "Celebrating this important milestone in style",
+      },
+      {
+        title: "Bat Mitzvah",
+        description: "Documenting this significant celebration",
+      },
+      {
+        title: "Circumcision Ceremony",
+        description: "Preserving precious family moments",
+      },
+      {
+        title: "Tefilin Ceremony",
+        description: "Capturing spiritual moments with reverence",
+      },
+      {
+        title: "Design Photography",
+        description: "Showcasing artistic and creative compositions",
+      },
+      {
+        title: "Business Events",
+        description: "Professional coverage for corporate gatherings",
+      },
+      {
+        title: "First Haircut Ceremony",
+        description: "Documenting this traditional celebration",
+      },
+      {
+        title: "Proposal Photography",
+        description: "Capturing the moment of a lifetime",
+      },
+      {
+        title: "Engagement Ceremony",
+        description: "Preserving the joy of commitment",
+      },
+      {
+        title: "Torah Ceremony",
+        description: "Documenting spiritual celebrations",
+      },
+    ],
   },
   he: {
     title: "תיק",
     titleHighlight: "העבודות שלנו",
-    subtitle: "חקרו את האוסף המגוון שלנו של עבודות צילום בתחומים וסגנונות שונים.",
+    subtitle:
+      "חקרו את האוסף המגוון שלנו של עבודות צילום בתחומים וסגנונות שונים.",
     categories: {
       All: "הכל",
-      Weddings: "חתונות",
-      Events: "אירועים",
-      Fashion: "אופנה",
-      Nature: "טבע"
+      wedding: "חתונה",
+      "bar-mitzvah": "בר מצווה",
+      "bat-mitzvah": "בת מצווה",
+      circumcision: "ברית מילה",
+      tefilin: "תפילין",
+      designs: "עיצובים",
+      business: "אירועים עסקיים",
+      haircut: "חלאקה",
+      porpusal: "הצעות נישואין",
+      engagement: "אירוסין",
+      torah: "הכנסת ספר תורה",
     },
     viewCollection: "צפה באוסף",
     portfolioMeta: [
-      { title: "חתונה במדבר", description: "חגיגה אינטימית תחת הכוכבים" },
-      { title: "שבוע האופנה", description: "צילומי אופנה יוקרתיים מהמסלול" },
-      { title: "נוף הרים", description: "נופים עוצרי נשימה מפסגות הרים" },
-      { title: "אירוע עסקי", description: "כיסוי מקצועי של כנסים עסקיים" }
-    ]
-  }
+      {
+        title: "צילומי חתונה",
+        description: "תיעוד היום המיוחד שלכם באלגנטיות ובסטייל",
+      },
+      {
+        title: "בר מצווה",
+        description: "חגיגת אבן דרך משמעותית בסטייל",
+      },
+      {
+        title: "בת מצווה",
+        description: "תיעוד חגיגה משמעותית",
+      },
+      {
+        title: "ברית מילה",
+        description: "שימור רגעים יקרים במשפחה",
+      },
+      {
+        title: "טקס תפילין",
+        description: "תיעוד רגעים רוחניים ביראת כבוד",
+      },
+      {
+        title: "צילומי עיצוב",
+        description: "הצגת קומפוזיציות אמנותיות ויצירתיות",
+      },
+      {
+        title: "אירועים עסקיים",
+        description: "כיסוי מקצועי למפגשים עסקיים",
+      },
+      {
+        title: "טקס חלאקה",
+        description: "תיעוד חגיגה מסורתית",
+      },
+      {
+        title: "צילומי הצעת נישואין",
+        description: "תיעוד הרגע המרגש",
+      },
+      {
+        title: "טקס אירוסין",
+        description: "שימור שמחת ההתחייבות",
+      },
+      {
+        title: "הכנסת ספר תורה",
+        description: "תיעוד חגיגות רוחניות",
+      },
+    ],
+  },
 };
 
-
-export default function Portfolio({ lang = 'en' }) { // Default lang if not passed
+export default function Portfolio({ lang = "en" }) {
+  // Default lang if not passed
   const [selectedCategoryKey, setSelectedCategoryKey] = useState("All"); // Store the key
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [autoScrollTo, setAutoScrollTo] = useState(null);
+  const location = useLocation();
 
   const t = pageTranslations[lang];
-  const isRTL = lang === 'he';
+  const isRTL = lang === "he";
 
   const categoryKeys = Object.keys(pageTranslations.en.categories); // Get keys from one lang
 
   const filteredItems = portfolioItemsData.filter(
-    item => selectedCategoryKey === "All" || item.categoryKey === selectedCategoryKey
+    (item) =>
+      selectedCategoryKey === "All" || item.categoryKey === selectedCategoryKey
   );
 
+  // Auto-select collection if id is present in query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const collectionId = params.get("id");
+    if (collectionId) {
+      // Optionally, you could scroll to or highlight the collection
+      setAutoScrollTo(collectionId);
+    } else {
+      setAutoScrollTo(null);
+    }
+  }, [location.search]);
+
   return (
-    <div className="min-h-screen py-20" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen py-20" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div
@@ -100,17 +264,17 @@ export default function Portfolio({ lang = 'en' }) { // Default lang if not pass
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             {t.title} <span className="text-primary">{t.titleHighlight}</span>
           </h1>
-          <p className="text-lg opacity-80 max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
+          <p className="text-lg opacity-80 max-w-2xl mx-auto">{t.subtitle}</p>
         </motion.div>
 
         {/* Category Filter */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className={`flex flex-wrap justify-center gap-4 mb-12 ${isRTL ? 'flex-row-reverse' : ''}`}
+          className={`flex flex-wrap justify-center gap-4 mb-12 ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
         >
           {categoryKeys.map((key, index) => (
             <motion.button
@@ -122,7 +286,7 @@ export default function Portfolio({ lang = 'en' }) { // Default lang if not pass
                 selectedCategoryKey === key
                   ? "bg-primary text-white"
                   : "bg-accent"
-              } ${isRTL ? 'flex-row-reverse' : ''}`}
+              } ${isRTL ? "flex-row-reverse" : ""}`}
             >
               {key === "All" && <Filter className="h-4 w-4" />}
               <span>{t.categories[key]}</span>
@@ -131,13 +295,16 @@ export default function Portfolio({ lang = 'en' }) { // Default lang if not pass
         </motion.div>
 
         {/* Portfolio Grid */}
-        <motion.div 
+        <motion.div
           layout
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           <AnimatePresence>
             {filteredItems.map((item, index) => {
-              const itemMeta = t.portfolioMeta[portfolioItemsData.findIndex(p => p.id === item.id)] || { title: item.id, description: ''};
+              const isAutoScroll = autoScrollTo === item.id;
+              const itemMeta = t.portfolioMeta[
+                portfolioItemsData.findIndex((p) => p.id === item.id)
+              ] || { title: item.id, description: "" };
               return (
                 <motion.div
                   key={item.id}
@@ -149,8 +316,24 @@ export default function Portfolio({ lang = 'en' }) { // Default lang if not pass
                   className="relative aspect-square group"
                   onHoverStart={() => setHoveredItem(item.id)}
                   onHoverEnd={() => setHoveredItem(null)}
+                  ref={(el) => {
+                    if (isAutoScroll && el) {
+                      el.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                    }
+                  }}
                 >
-                  <Link to={createPageUrl("Collection") + "?id=" + item.id + "&lang=" + lang}>
+                  <Link
+                    to={
+                      createPageUrl("Collection") +
+                      "?id=" +
+                      item.id +
+                      "&lang=" +
+                      lang
+                    }
+                  >
                     <img
                       src={item.image}
                       alt={itemMeta.title}
@@ -165,18 +348,26 @@ export default function Portfolio({ lang = 'en' }) { // Default lang if not pass
                       <h3 className="text-2xl font-bold text-white mb-2">
                         {itemMeta.title}
                       </h3>
-                      <p className="text-gray-300 mb-4">{itemMeta.description}</p>
-                      <div className={`flex items-center text-primary group-hover:text-white transition-colors ${
-                        isRTL ? 'flex-row-reverse' : ''
-                      }`}>
-                        {!isRTL && <ArrowRight className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />}
+                      <p className="text-gray-300 mb-4">
+                        {itemMeta.description}
+                      </p>
+                      <div
+                        className={`flex items-center text-primary group-hover:text-white transition-colors ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        {!isRTL && (
+                          <ArrowRight className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                        )}
                         <span>{t.viewCollection}</span>
-                        {isRTL && <ArrowRight className="h-4 w-4 ml-2 group-hover:-translate-x-1 transition-transform transform rotate-180" />}
+                        {isRTL && (
+                          <ArrowRight className="h-4 w-4 ml-2 group-hover:-translate-x-1 transition-transform transform rotate-180" />
+                        )}
                       </div>
                     </motion.div>
                   </Link>
                 </motion.div>
-              )
+              );
             })}
           </AnimatePresence>
         </motion.div>

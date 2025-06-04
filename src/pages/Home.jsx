@@ -1,57 +1,33 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowRight,
-  Quote,
-  Camera,
-  ChevronsRight,
-  ArrowLeft,
-} from "lucide-react";
-import { Link } from "react-router-dom"; // Import Link
-import { createPageUrl } from "@/utils"; // Import createPageUrl
+import { ArrowRight, Quote, Camera, ChevronsRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import faceAboutImg from "../assets/images/face_about.jpg";
+import img0031 from "../assets/images/home/IMG-20250604-WA0031.jpg";
+import img0032 from "../assets/images/home/IMG-20250604-WA0032.jpg";
+import img0033 from "../assets/images/home/IMG-20250604-WA0033.jpg";
+import img0035 from "../assets/images/home/IMG-20250604-WA0035.jpg";
+import img0036 from "../assets/images/home/IMG-20250604-WA0036.jpg";
+import img0037 from "../assets/images/home/IMG-20250604-WA0037.jpg";
+import img0026 from "../assets/images/home/IMG-20250604-WA0026.jpg";
+import img0027 from "../assets/images/home/IMG-20250604-WA0027.jpg";
+import img0028 from "../assets/images/home/IMG-20250604-WA0028.jpg";
+import img0029 from "../assets/images/home/IMG-20250604-WA0029.jpg";
+import img0030 from "../assets/images/home/IMG-20250604-WA0030.jpg";
 
 const baseCollectionsData = [
-  {
-    id: "weddings",
-    imageKey: "weddings_0",
-    images: [
-      "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1591604466107-ec97de577aff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", // More images for full collection
-    ],
-  },
-  {
-    id: "corporate",
-    imageKey: "corporate_0",
-    images: [
-      "https://images.unsplash.com/photo-1556761175-4b46a572b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1558403194-611308249627?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1540317580384-e5d43867caa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    ],
-  },
-  {
-    id: "concerts",
-    imageKey: "concerts_0",
-    images: [
-      "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1505058707965-09a4469a87e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    ],
-  },
-  {
-    id: "fashion",
-    imageKey: "fashion_0",
-    images: [
-      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1627483262268-9c2b5b2834b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    ],
-  },
+  { id: "wedding", imageKey: "wedding", images: [img0031] },
+  { id: "bar-mitzvah", imageKey: "bar-mitzvah", images: [img0032] },
+  { id: "bat-mitzvah", imageKey: "bat-mitzvah", images: [img0033] },
+  { id: "circumcision", imageKey: "circumcision", images: [img0035] },
+  { id: "tefilin", imageKey: "tefilin", images: [img0036] },
+  { id: "designs", imageKey: "designs", images: [img0037] },
+  { id: "business", imageKey: "business", images: [img0026] },
+  { id: "haircut", imageKey: "haircut", images: [img0027] },
+  { id: "porpusal", imageKey: "porpusal", images: [img0028] },
+  { id: "engagement", imageKey: "engagement", images: [img0029] },
+  { id: "torah", imageKey: "torah", images: [img0030] },
 ];
 
 const pageTranslations = {
@@ -66,12 +42,16 @@ const pageTranslations = {
     bioTitleLine1: "Capturing Life's",
     bioTitleHighlight: "Extraordinary Moments",
     bioParagraph1:
-      "With over a decade of experience photographing events across the globe, I bring a unique perspective and artistic vision to every shoot. My passion lies in finding those fleeting moments that tell a powerful story.",
+      "Hello! I'm Netanel, a professional photographer who lives and breathes the unique world of photography, with a deep passion for capturing rare moments and emotions that aren't always easy to put into words. I believe that photography is much more than a beautiful image – it's a whole story, a collection of experiences and emotions that turn into unforgettable moments.",
     bioParagraph2:
-      "My approach blends photojournalistic candids with fine art composition, resulting in images that are both authentic and visually stunning. I believe that great event photography should transport you back to the emotions of that day.",
+      "My journey into photography began from a love of exploration and discovery, driven by curiosity about the world around me and the small moments that make it up. Over the years, I've come to understand that every photo is a small dialogue between me and what I see through the lens – a dialogue based on trust, connection, and respect for the moment.",
     bioParagraph3:
-      "Whether it's the nervous anticipation before a wedding ceremony, the energy of a packed concert venue, or the sophisticated atmosphere of a corporate gala, I'm dedicated to creating visual narratives that stand the test of time.",
-    photographerName: "Alex Morgan, Lead Photographer",
+      "For me, every photo session is unique and personally tailored to your dreams and wishes. My goal is to create images that tell your story – images you can look at and relive the feelings, colors, and scents of those magical moments.",
+    bioParagraph4:
+      "I'm here to accompany you and create meaningful experiences together – whether it's a big, emotional event, an intimate family shoot, a personal portrait that reflects your personality, or any moment you wish to capture and preserve. Together, we'll do it in a relaxed and pleasant atmosphere, with great sensitivity and attention to the small details that turn every photo into a piece of art.",
+    bioParagraph5:
+      "I invite you to join me on a journey where we'll build memories that will stay with you forever – let's capture your story, your moments, your life.",
+    photographerName: "Netanel, Your Photographer",
     quotes: [
       "Photography is the story I fail to put into words.",
       "When words become unclear, I shall focus with photographs.",
@@ -79,27 +59,21 @@ const pageTranslations = {
       "A photograph is a secret about a secret. The more it tells you, the less you know.",
       "Photography is truth. And cinema is truth 24 times per second.",
     ],
-    quoteInstruction: "Click on a collection below to change the quote",
     collectionsTitle: "Photography Collections",
     collectionsSubtitle:
       "Explore different genres and events through the lens of artistic expression",
     collectionItems: {
-      weddings: {
-        title: "Weddings",
-        description: "Capturing love stories in their purest form",
-      },
-      corporate: {
-        title: "Corporate",
-        description: "Professional imagery for business events",
-      },
-      concerts: {
-        title: "Concerts",
-        description: "Electrifying moments from live performances",
-      },
-      fashion: {
-        title: "Fashion",
-        description: "Editorial and runway photography",
-      },
+      wedding: { title: "Wedding" },
+      "bar-mitzvah": { title: "Bar Mitzvah" },
+      "bat-mitzvah": { title: "Bat Mitzvah" },
+      circumcision: { title: "Circumcision" },
+      tefilin: { title: "Tefilin" },
+      business: { title: "Business" },
+      haircut: { title: "First Haircut" },
+      porpusal: { title: "Proposal" },
+      engagement: { title: "Engagement" },
+      torah: { title: "Torah" },
+      designs: { title: "Designs" },
     },
     viewCollection: "View collection",
     viewFullCollectionButton: "View Full Collection", // New translation
@@ -123,12 +97,16 @@ const pageTranslations = {
     bioTitleLine1: "לוכדים את הרגעים",
     bioTitleHighlight: "הבלתי רגילים של החיים",
     bioParagraph1:
-      "עם ניסיון של למעלה מעשור בצילום אירועים ברחבי העולם, אני מביא פרספקטיבה ייחודית וחזון אמנותי לכל צילום. התשוקה שלי היא למצוא את אותם רגעים חולפים המספרים סיפור עוצמתי.",
+      "שלום! אני נתנאל, צלם מקצועי שחי ונושם את העולם הייחודי של הצילום, עם תשוקה עצומה לתפיסת רגעים נדירים ורגשות שלא תמיד קל לתאר במילים. אני מאמין שצילום הוא הרבה מעבר לתמונה יפה – זהו סיפור שלם, חוויות, ואוסף של רגשות שהופכים לרגעים בלתי נשכחים.",
     bioParagraph2:
-      "הגישה שלי משלבת צילום עיתונאי אותנטי עם קומפוזיציה אמנותית, מה שמביא לתמונות שהן גם אמיתיות וגם מרהיבות חזותית. אני מאמין שצילום אירועים נהדר צריך להחזיר אותך לרגשות של אותו יום.",
+      "הדרך שלי בעולם הצילום התחילה מתוך אהבה לחקר ולגילוי, מתוך סקרנות לעולם סביבי ולרגעים הקטנים שמרכיבים אותו. עם השנים, הבנתי שכל תמונה היא דיאלוג קטן ביני לבין מה שאני רואה דרך העדשה – דיאלוג שמבוסס על אמון, חיבור וכבוד לרגע.",
     bioParagraph3:
-      "בין אם זו הציפייה המתוחה לפני טקס חתונה, האנרגיה של אולם קונצרטים מלא, או האווירה המתוחכמת של גאלה תאגידית, אני מחויב ליצירת נרטיבים ויזואליים העומדים במבחן הזמן.",
-    photographerName: "אלכס מורגן, צלם ראשי",
+      "עבורי, כל מפגש צילומי הוא ייחודי ומותאם באופן אישי לחלומות ולרצונות שלך. המטרה שלי היא ליצור עבורך תמונות שמספרות את הסיפור שלך, שתוכל להביט בהן ולחוות מחדש את התחושות, הצבעים והריחות של אותם רגעים קסומים.",
+    bioParagraph4:
+      "אני כאן כדי ללוות אותך וליצור יחד חוויות משמעותיות – בין אם מדובר באירוע גדול ומרגש, צילומי משפחה אינטימיים, פורטרט אישי שמשקף את האישיות שלך, או כל רגע שתרצה לתפוס ולשמר. יחד, נעשה זאת באווירה נינוחה ונעימה, עם הרבה רגישות והקפדה על הפרטים הקטנים שהופכים כל צילום לאומנות.",
+    bioParagraph5:
+      "אני מזמין אותך לצאת איתי למסע שבו נבנה זיכרונות שישארו איתך לנצח – בואו נצלם את הסיפור שלך, את הרגעים שלך, את החיים שלך.",
+    photographerName: "נתנאל, הצלם שלך",
     quotes: [
       "צילום הוא הסיפור שאני לא מצליח לבטא במילים.",
       "כשהמילים נעשות לא ברורות, אתמקד בצילומים.",
@@ -136,20 +114,20 @@ const pageTranslations = {
       "צילום הוא סוד על סוד. ככל שהוא מספר לך יותר, אתה יודע פחות.",
       "צילום הוא אמת. וקולנוע הוא אמת 24 פעמים בשנייה.",
     ],
-    quoteInstruction: "לחץ על אוסף למטה כדי לשנות את הציטוט",
     collectionsTitle: "אוספי צילום",
     collectionsSubtitle: "חקרו ז'אנרים ואירועים שונים דרך עדשת הביטוי האמנותי",
     collectionItems: {
-      weddings: {
-        title: "חתונות",
-        description: "לוכדים סיפורי אהבה בצורתם הטהורה ביותר",
-      },
-      corporate: {
-        title: "אירועים עסקיים",
-        description: "דימויים מקצועיים לאירועים עסקיים",
-      },
-      concerts: { title: "הופעות", description: "רגעים מחשמלים מהופעות חיות" },
-      fashion: { title: "אופנה", description: "צילומי אדיטוריאל ומסלול" },
+      wedding: { title: "חתונה" },
+      "bar-mitzvah": { title: "בר מצווה" },
+      "bat-mitzvah": { title: "בת מצווה" },
+      circumcision: { title: "ברית מילה" },
+      tefilin: { title: "תפילין" },
+      business: { title: "אירועים עסקיים" },
+      haircut: { title: "חלאקה" },
+      porpusal: { title: "הצעות נישואין" },
+      engagement: { title: "אירוסין" },
+      torah: { title: "הכנסת ספר תורה" },
+      designs: { title: "עיצובים" },
     },
     viewCollection: "צפה באוסף",
     viewFullCollectionButton: "צפה בכל האוסף", // New translation
@@ -165,14 +143,13 @@ const pageTranslations = {
 };
 
 export default function Home({ lang }) {
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [allHeroImages, setAllHeroImages] = useState([]);
-  const [activeCollection, setActiveCollection] = useState(null);
   const [currentQuote, setCurrentQuote] = useState("");
-  const [isQuoteChanging, setIsQuoteChanging] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
 
   const collectionsSectionRef = useRef(null); // Ref for the collections section wrapper
-  const expandedCollectionRef = useRef(null); // Ref for the expanded collection content
 
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
@@ -191,7 +168,20 @@ export default function Home({ lang }) {
   useEffect(() => {
     if (t && t.quotes && t.quotes.length > 0) {
       setCurrentQuote(t.quotes[0]);
+      setQuoteIndex(0);
     }
+  }, [t]);
+
+  useEffect(() => {
+    if (!t || !t.quotes || t.quotes.length === 0) return;
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => {
+        const next = (prev + 1) % t.quotes.length;
+        setCurrentQuote(t.quotes[next]);
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
   }, [t]);
 
   useEffect(() => {
@@ -203,31 +193,6 @@ export default function Home({ lang }) {
     }, 3000);
     return () => clearInterval(interval);
   }, [allHeroImages]);
-
-  const handleCollectionClick = (collectionData) => {
-    const previouslyActive = activeCollection?.id === collectionData.id;
-    setActiveCollection(previouslyActive ? null : collectionData);
-
-    setIsQuoteChanging(true);
-    setTimeout(() => {
-      const randomQuote = t.quotes[Math.floor(Math.random() * t.quotes.length)];
-      setCurrentQuote(randomQuote);
-      setIsQuoteChanging(false);
-    }, 300);
-
-    // Smooth scroll to the expanded collection or top of collections section
-    setTimeout(() => {
-      if (!previouslyActive && expandedCollectionRef.current) {
-        expandedCollectionRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      } else if (previouslyActive && collectionsSectionRef.current) {
-        // Optionally scroll to top of collection list if one was closed
-        // collectionsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100); // Delay to allow layout to update
-  };
 
   return (
     <div className="relative overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
@@ -320,7 +285,7 @@ export default function Home({ lang }) {
                   }`}
                 />
                 <img
-                  src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                  src={faceAboutImg}
                   alt={t.photographerName}
                   className="w-full h-[500px] object-cover rounded-2xl shadow-xl relative z-10"
                 />
@@ -349,6 +314,8 @@ export default function Home({ lang }) {
                   <p>{t.bioParagraph1}</p>
                   <p>{t.bioParagraph2}</p>
                   <p>{t.bioParagraph3}</p>
+                  <p>{t.bioParagraph4}</p>
+                  <p>{t.bioParagraph5}</p>
                 </div>
 
                 <div
@@ -392,9 +359,6 @@ export default function Home({ lang }) {
                 {currentQuote}
               </motion.blockquote>
             </AnimatePresence>
-            <p className="text-sm uppercase tracking-widest text-gray-400">
-              {t.quoteInstruction}
-            </p>
           </motion.div>
         </div>
       </section>
@@ -423,11 +387,12 @@ export default function Home({ lang }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12">
+          <div className="grid grid-cols-4 gap-4 mb-12">
             {baseCollectionsData.map((collection, index) => {
-              const translatedCollection = t.collectionItems[collection.id] || {
-                title: collection.id,
-                description: "",
+              const translatedCollection = t.collectionItems[
+                collection.imageKey
+              ] || {
+                title: collection.imageKey,
               };
               return (
                 <motion.div
@@ -436,13 +401,11 @@ export default function Home({ lang }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  onClick={() => handleCollectionClick(collection)}
+                  onClick={() => {
+                    navigate(`/collection?id=${collection.id}&lang=${lang}`);
+                  }}
                   className={`relative overflow-hidden group rounded-xl cursor-pointer transition-all duration-300 h-64 md:h-80 transform ${
                     index % 2 === 0 ? "md:translate-y-12" : ""
-                  } ${
-                    activeCollection?.id === collection.id
-                      ? "ring-2 ring-pink-500 scale-[1.02]"
-                      : ""
                   }`}
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
@@ -461,9 +424,6 @@ export default function Home({ lang }) {
                     <h3 className="text-2xl font-bold mb-2 text-white">
                       {translatedCollection.title}
                     </h3>
-                    <p className="text-gray-300 mb-4">
-                      {translatedCollection.description}
-                    </p>
                     <div
                       className={`flex items-center text-pink-400 font-medium ${
                         isRTL ? "flex-row-reverse" : ""
@@ -482,79 +442,6 @@ export default function Home({ lang }) {
               );
             })}
           </div>
-
-          {/* Expanded Collection Gallery Preview */}
-          <AnimatePresence>
-            {activeCollection && (
-              <motion.div
-                ref={expandedCollectionRef}
-                id={`collection-${activeCollection.id}`}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                className="overflow-hidden"
-              >
-                <div
-                  className={`pt-6 pb-12 ${isRTL ? "text-right" : "text-left"}`}
-                >
-                  <h3 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500">
-                    {(t.collectionItems[activeCollection.id]?.title ||
-                      activeCollection.id) +
-                      " " +
-                      t.galleryTitleSuffix}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {activeCollection.images.slice(0, 3).map(
-                      (
-                        image,
-                        i // Show first 3 images as preview
-                      ) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          className="relative h-64 md:h-80 overflow-hidden rounded-lg transform transition-all hover:scale-[1.02] duration-300"
-                        >
-                          <img
-                            src={image}
-                            alt={`${
-                              t.collectionItems[activeCollection.id]?.title ||
-                              activeCollection.id
-                            } ${i + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </motion.div>
-                      )
-                    )}
-                  </div>
-                  <div className={`mt-8 ${isRTL ? "text-left" : "text-right"}`}>
-                    <Link
-                      to={createPageUrl(
-                        `Collection?id=${activeCollection.id}&lang=${lang}`
-                      )}
-                    >
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`px-8 py-3 bg-primary text-white rounded-full flex items-center gap-2 ${
-                          isRTL ? "ml-auto flex-row-reverse" : "mr-auto"
-                        }`}
-                      >
-                        <span>{t.viewFullCollectionButton}</span>
-                        {isRTL ? (
-                          <ArrowLeft className="h-4 w-4" />
-                        ) : (
-                          <ArrowRight className="h-4 w-4" />
-                        )}
-                      </motion.button>
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </section>
 
@@ -594,7 +481,10 @@ export default function Home({ lang }) {
             <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-10">
               {t.ctaSubtitle}
             </p>
-            <button className="px-10 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 text-lg">
+            <button
+              onClick={() => navigate(`/contact?lang=${lang}`)}
+              className="px-10 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 text-lg"
+            >
               {t.ctaButton}
             </button>
           </motion.div>
