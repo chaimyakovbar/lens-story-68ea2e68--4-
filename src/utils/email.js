@@ -1,11 +1,5 @@
 export const sendEmail = async (formData) => {
   try {
-    console.log("Sending email with data:", {
-      from_name: `${formData.firstName} ${formData.lastName}`,
-      from_email: formData.email,
-      message: formData.message,
-      to_name: "Netanel",
-    });
 
     const response = await fetch("/api/send-email", {
       method: "POST",
@@ -21,7 +15,6 @@ export const sendEmail = async (formData) => {
       }),
     });
 
-    console.log("Response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -30,8 +23,6 @@ export const sendEmail = async (formData) => {
     }
 
     const data = await response.json();
-    console.log("Success response:", data);
-
     return {
       success: true,
       message: "Email sent successfully!",
