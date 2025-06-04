@@ -15,6 +15,8 @@ import img0027 from "../assets/images/home/IMG-20250604-WA0027.jpg";
 import img0028 from "../assets/images/home/IMG-20250604-WA0028.jpg";
 import img0029 from "../assets/images/home/IMG-20250604-WA0029.jpg";
 import img0030 from "../assets/images/home/IMG-20250604-WA0030.jpg";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import InstagramIcon from "@mui/icons-material/Instagram";
 
 const baseCollectionsData = [
   { id: "wedding", imageKey: "wedding", images: [img0031] },
@@ -38,7 +40,6 @@ const pageTranslations = {
     heroSubtitle:
       "Premium event photography that tells your story with artistic flair and technical excellence",
     exploreWork: "Explore Work",
-    bioSectionTag: "About The Artist",
     bioTitleLine1: "Capturing Life's",
     bioTitleHighlight: "Extraordinary Moments",
     bioParagraph1:
@@ -82,9 +83,10 @@ const pageTranslations = {
     ctaSubtitle:
       "Let's create something extraordinary together. From intimate gatherings to grand celebrations, I'm here to document your special moments with style and creativity.",
     ctaButton: "Get in Touch",
-    footerName: "ALEX MORGAN",
+    footerName: "NETANEL LEVINSTEIN",
     footerTagline: "Event Photography Specialist",
     footerCopyright: "© {year} All Rights Reserved",
+    footerBuiltBy: "Built by MCD webs",
   },
   he: {
     heroTitleLine1: "לוכדים רגעים",
@@ -93,7 +95,6 @@ const pageTranslations = {
     heroSubtitle:
       "צילום אירועים פרימיום המספר את סיפורכם בכישרון אמנותי ומצוינות טכנית",
     exploreWork: "גלה עוד",
-    bioSectionTag: "על האמן",
     bioTitleLine1: "לוכדים את הרגעים",
     bioTitleHighlight: "הבלתי רגילים של החיים",
     bioParagraph1:
@@ -136,9 +137,10 @@ const pageTranslations = {
     ctaSubtitle:
       "בואו ניצור משהו יוצא דופן ביחד. ממפגשים אינטימיים ועד חגיגות מפוארות, אני כאן כדי לתעד את הרגעים המיוחדים שלכם בסטייל ויצירתיות.",
     ctaButton: "צור קשר",
-    footerName: "אלכס מורגן",
+    footerName: "נתנאל לוינשטיין",
     footerTagline: "מומחה צילום אירועים",
     footerCopyright: "© {year} כל הזכויות שמורות",
+    footerBuiltBy: "נבנה על ידי MCD webs",
   },
 };
 
@@ -300,9 +302,6 @@ export default function Home({ lang }) {
                 viewport={{ once: true }}
                 className={isRTL ? "text-right" : "text-left"}
               >
-                <span className="block text-pink-600 font-medium tracking-widest uppercase text-sm mb-3">
-                  {t.bioSectionTag}
-                </span>
                 <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-black dark:text-white">
                   {t.bioTitleLine1}
                   <br />
@@ -387,7 +386,7 @@ export default function Home({ lang }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             {baseCollectionsData.map((collection, index) => {
               const translatedCollection = t.collectionItems[
                 collection.imageKey
@@ -492,25 +491,54 @@ export default function Home({ lang }) {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-black border-t border-gray-800">
+      <footer className="py-16 bg-gradient-to-b from-black to-gray-900 border-t border-gray-800">
         <div className="container mx-auto px-4">
           <div
-            className={`flex flex-col md:justify-between md:items-center ${
+            className={`flex flex-col md:justify-between md:items-center gap-8 ${
               isRTL ? "md:flex-row-reverse text-right" : "md:flex-row text-left"
             }`}
           >
             <div
-              className={`mb-6 md:mb-0 ${
+              className={`space-y-4 ${
                 isRTL ? "md:text-right" : "md:text-left"
               }`}
             >
-              <h2 className="text-2xl font-bold text-white">{t.footerName}</h2>
-              <p className="text-gray-400">{t.footerTagline}</p>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+                {t.footerName}
+              </h2>
+              <p className="text-gray-300 text-lg">{t.footerTagline}</p>
             </div>
-            <div>
-              <p className="text-gray-400 text-sm">
-                {t.footerCopyright.replace("{year}", new Date().getFullYear())}
-              </p>
+            <div className="flex flex-col items-center md:items-end gap-4">
+              <div className="flex gap-4">
+                <a
+                  href="https://www.instagram.com/myisraeliview?igsh=MTh1cHBkaGpnazRscg=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                >
+                  <InstagramIcon className="w-5 h-5 text-gray-300" />
+                </a>
+                <a
+                  href="https://api.whatsapp.com/send?phone=972548005704&text=אני+מעוניין+בצלם++"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                >
+                  <WhatsAppIcon className="w-5 h-5 text-gray-300" />
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-gray-400 text-sm">
+                  {t.footerCopyright.replace(
+                    "{year}",
+                    new Date().getFullYear()
+                  )}
+                </p>
+                <span className="text-gray-400 text-sm">•</span>
+                <p className="text-sm font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent hover:from-pink-600 hover:to-orange-600 transition-all duration-300">
+                  {t.footerBuiltBy}
+                </p>
+              </div>
             </div>
           </div>
         </div>

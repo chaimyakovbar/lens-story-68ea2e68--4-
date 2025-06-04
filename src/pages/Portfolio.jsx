@@ -284,7 +284,7 @@ export default function Portfolio({ lang = "en" }) {
               onClick={() => setSelectedCategoryKey(key)}
               className={`px-6 py-2 rounded-full flex items-center gap-2 transition-colors ${
                 selectedCategoryKey === key
-                  ? "bg-primary text-white"
+                  ? "bg-gradient-to-r from-pink-600 to-red-600 text-white"
                   : "bg-accent"
               } ${isRTL ? "flex-row-reverse" : ""}`}
             >
