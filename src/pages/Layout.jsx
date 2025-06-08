@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
+import AccessibilityMenu from "../components/AccessibilityMenu";
 
 const layoutTranslations = {
   he: {
@@ -105,6 +106,7 @@ export default function Layout({
       } ${lang === "he" ? "font-assistant" : "font-inter"}`} // Using specific font names
       dir={lang === "he" ? "rtl" : "ltr"}
     >
+      <AccessibilityMenu lang={lang} />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap');

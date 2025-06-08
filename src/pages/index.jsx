@@ -17,6 +17,7 @@ import {
   Route,
   Routes,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 
 import { useState, useEffect } from "react";
@@ -53,6 +54,13 @@ function PagesContent({ lang, toggleLanguage }) {
   const location = useLocation();
   const currentPage = _getCurrentPage(location.pathname);
 
+  // Force Hebrew if no language is specified in URL
+  useEffect(() => {
+    if (!location.search.includes("lang=")) {
+      window.location.href = `${location.pathname}?lang=he`;
+    }
+  }, [location]);
+
   return (
     <Layout
       currentPageName={currentPage}
@@ -61,16 +69,11 @@ function PagesContent({ lang, toggleLanguage }) {
     >
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home lang={lang} />} />
-
+        <Route path="/" element={<Navigate to="/Home?lang=he" replace />} />
         <Route path="/Home" element={<Home lang={lang} />} />
-
         <Route path="/Portfolio" element={<Portfolio lang={lang} />} />
-
         <Route path="/About" element={<About lang={lang} />} />
-
         <Route path="/Contact" element={<Contact lang={lang} />} />
-
         <Route path="/Collection" element={<Collection lang={lang} />} />
       </Routes>
     </Layout>
@@ -79,19 +82,37 @@ function PagesContent({ lang, toggleLanguage }) {
 
 export default function Pages() {
   const [lang, setLang] = useState(() => {
+    // Force Hebrew as default
     if (typeof window !== "undefined") {
-      return localStorage.getItem("appLanguage") || "en";
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get("lang");
+
+      if (urlLang) {
+        localStorage.setItem("appLanguage", urlLang);
+        return urlLang;
+      }
+
+      // If no language in URL, force Hebrew
+      localStorage.setItem("appLanguage", "he");
+      return "he";
     }
-    return "en";
+    return "he";
   });
 
   const toggleLanguage = () => {
-    setLang((prevLang) => (prevLang === "en" ? "he" : "en"));
+    const newLang = lang === "en" ? "he" : "en";
+    setLang(newLang);
+    // Update URL with new language
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", newLang);
+    window.history.pushState({}, "", url);
   };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("appLanguage", lang);
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
     }
   }, [lang]);
 

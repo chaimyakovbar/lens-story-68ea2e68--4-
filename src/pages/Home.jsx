@@ -17,7 +17,6 @@ import img0029 from "../assets/images/home/IMG-20250604-WA0029.jpg";
 import img0030 from "../assets/images/home/IMG-20250604-WA0030.jpg";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import InstagramIcon from "@mui/icons-material/Instagram";
-import AccessibilityMenu from "../components/AccessibilityMenu";
 
 const baseCollectionsData = [
   { id: "wedding", imageKey: "wedding", images: [img0031] },
@@ -199,7 +198,6 @@ export default function Home({ lang }) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <AccessibilityMenu lang={lang} />
       <div className="relative overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
         {/* Hero Section */}
         <section className="relative h-screen">
