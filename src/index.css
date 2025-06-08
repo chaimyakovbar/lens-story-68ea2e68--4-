@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -71,8 +70,6 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
-
-
 
 @layer base {
   :root {
@@ -146,8 +143,6 @@ button:focus-visible {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -155,4 +150,103 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --accent-primary: #ffff00;
+  --accent-secondary: #00ffff;
+}
+
+.high-contrast body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.high-contrast .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+.high-contrast .text-gray-300 {
+  color: var(--text-primary) !important;
+}
+
+.high-contrast .bg-gray-900 {
+  background-color: var(--bg-secondary) !important;
+}
+
+.high-contrast .bg-gray-800 {
+  background-color: var(--bg-primary) !important;
+}
+
+.high-contrast .border-gray-800 {
+  border-color: var(--accent-primary) !important;
+}
+
+.high-contrast .hover\:bg-gray-700:hover {
+  background-color: var(--accent-primary) !important;
+}
+
+.high-contrast .hover\:bg-gray-800:hover {
+  background-color: var(--accent-secondary) !important;
+}
+
+.high-contrast .from-pink-500 {
+  --tw-gradient-from: var(--accent-primary) !important;
+}
+
+.high-contrast .to-orange-500 {
+  --tw-gradient-to: var(--accent-secondary) !important;
+}
+
+.high-contrast .hover\:from-pink-600:hover {
+  --tw-gradient-from: var(--accent-secondary) !important;
+}
+
+.high-contrast .hover\:to-orange-600:hover {
+  --tw-gradient-to: var(--accent-primary) !important;
+}
+
+/* Focus styles for better keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.high-contrast *:focus-visible {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+/* Text Spacing */
+.text-spacing {
+  letter-spacing: 0.12em;
+  word-spacing: 0.16em;
+  line-height: 2;
+}
+
+/* Large Cursor */
+.large-cursor * {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewport='0 0 100 100' style='fill:black;font-size:24px;'><circle cx='20' cy='20' r='18' stroke='white' stroke-width='2' fill='rgba(0,0,0,0.5)'/></svg>")
+      20 20,
+    auto !important;
+}
+
+/* Reduced Motion */
+.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduced-motion .motion-safe\:animate-none {
+  animation: none !important;
+}
+
+.reduced-motion .motion-safe\:transition-none {
+  transition: none !important;
 }
