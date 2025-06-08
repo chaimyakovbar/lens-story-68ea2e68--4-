@@ -10,6 +10,8 @@ import Contact from "./Contact";
 
 import Collection from "./Collection";
 
+import ScrollToTop from "../components/ScrollToTop";
+
 import {
   BrowserRouter as Router,
   Route,
@@ -57,6 +59,7 @@ function PagesContent({ lang, toggleLanguage }) {
       lang={lang}
       toggleLanguage={toggleLanguage}
     >
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home lang={lang} />} />
 
