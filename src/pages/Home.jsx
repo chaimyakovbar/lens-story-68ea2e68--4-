@@ -17,6 +17,7 @@ import img0029 from "../assets/images/home/IMG-20250604-WA0029.jpg";
 import img0030 from "../assets/images/home/IMG-20250604-WA0030.jpg";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import InstagramIcon from "@mui/icons-material/Instagram";
+import AccessibilityMenu from "../components/AccessibilityMenu";
 
 const baseCollectionsData = [
   { id: "wedding", imageKey: "wedding", images: [img0031] },
@@ -197,352 +198,357 @@ export default function Home({ lang }) {
   }, [allHeroImages]);
 
   return (
-    <div className="relative overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
-      {/* Hero Section */}
-      <section className="relative h-screen">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentImageIndex}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
-            className="absolute inset-0 z-0"
-          >
-            <div
-              className="absolute inset-0 bg-black/30 z-10"
-              style={{ backdropFilter: "blur(3px)" }}
-            />
-            {allHeroImages.length > 0 && (
-              <img
-                src={allHeroImages[currentImageIndex]}
-                alt="Photography work" // Consider translating alt text if important
-                className="w-full h-full object-cover"
+    <div className="min-h-screen bg-gray-900 text-white">
+      <AccessibilityMenu lang={lang} />
+      <div className="relative overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
+        {/* Hero Section */}
+        <section className="relative h-screen">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="absolute inset-0 z-0"
+            >
+              <div
+                className="absolute inset-0 bg-black/30 z-10"
+                style={{ backdropFilter: "blur(3px)" }}
               />
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-white p-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-center max-w-5xl mx-auto"
-          >
-            <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tighter leading-tight">
-              {t.heroTitleLine1} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
-                {t.heroTitleHighlight}
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
-              {t.heroSubtitle}
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            className="absolute bottom-12"
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-sm uppercase tracking-widest mb-2">
-                {t.exploreWork}
-              </span>
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              >
-                <ChevronsRight className="h-6 w-6 rotate-90" />
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Photographer Bio Section */}
-      <section className="relative py-24 bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
-        <div className="absolute -top-28 -right-28 w-96 h-96 bg-yellow-400 rounded-full opacity-10 blur-3xl dark:opacity-5" />
-        <div className="absolute -bottom-28 -left-28 w-96 h-96 bg-pink-500 rounded-full opacity-10 blur-3xl dark:opacity-5" />
-
-        <div className="container mx-auto px-4">
-          <div
-            className={`flex flex-col md:items-center gap-12 ${
-              isRTL ? "md:flex-row-reverse" : "md:flex-row"
-            }`}
-          >
-            <div className="w-full md:w-1/2">
-              <motion.div
-                initial={{ opacity: 0, x: isRTL ? 30 : -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="relative"
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-tr from-pink-500/20 to-yellow-500/20 dark:from-pink-500/10 dark:to-yellow-500/10 rounded-2xl transform ${
-                    isRTL ? "-rotate-3" : "rotate-3"
-                  }`}
-                />
+              {allHeroImages.length > 0 && (
                 <img
-                  src={faceAboutImg}
-                  alt={t.photographerName}
-                  className="w-full h-[500px] object-cover rounded-2xl shadow-xl relative z-10"
+                  src={allHeroImages[currentImageIndex]}
+                  alt="Photography work" // Consider translating alt text if important
+                  className="w-full h-full object-cover"
                 />
-              </motion.div>
-            </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-            <div className="w-full md:w-1/2">
-              <motion.div
+          <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-white p-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="text-center max-w-5xl mx-auto"
+            >
+              <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tighter leading-tight">
+                {t.heroTitleLine1} <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
+                  {t.heroTitleHighlight}
+                </span>
+              </h1>
+              <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
+                {t.heroSubtitle}
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className="absolute bottom-12"
+            >
+              <div className="flex flex-col items-center">
+                <span className="text-sm uppercase tracking-widest mb-2">
+                  {t.exploreWork}
+                </span>
+                <motion.div
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  <ChevronsRight className="h-6 w-6 rotate-90" />
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Photographer Bio Section */}
+        <section className="relative py-24 bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
+          <div className="absolute -top-28 -right-28 w-96 h-96 bg-yellow-400 rounded-full opacity-10 blur-3xl dark:opacity-5" />
+          <div className="absolute -bottom-28 -left-28 w-96 h-96 bg-pink-500 rounded-full opacity-10 blur-3xl dark:opacity-5" />
+
+          <div className="container mx-auto px-4">
+            <div
+              className={`flex flex-col md:items-center gap-12 ${
+                isRTL ? "md:flex-row-reverse" : "md:flex-row"
+              }`}
+            >
+              <div className="w-full md:w-1/2">
+                <motion.div
+                  initial={{ opacity: 0, x: isRTL ? 30 : -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                  className="relative"
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-tr from-pink-500/20 to-yellow-500/20 dark:from-pink-500/10 dark:to-yellow-500/10 rounded-2xl transform ${
+                      isRTL ? "-rotate-3" : "rotate-3"
+                    }`}
+                  />
+                  <img
+                    src={faceAboutImg}
+                    alt={t.photographerName}
+                    className="w-full h-[500px] object-cover rounded-2xl shadow-xl relative z-10"
+                  />
+                </motion.div>
+              </div>
+
+              <div className="w-full md:w-1/2">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                  className={isRTL ? "text-right" : "text-left"}
+                >
+                  <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-black dark:text-white">
+                    {t.bioTitleLine1}
+                    <br />
+                    <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-500">
+                      {t.bioTitleHighlight}
+                    </span>
+                  </h2>
+                  <div className="text-gray-700 dark:text-gray-300 space-y-4 text-lg leading-relaxed">
+                    <p>{t.bioParagraph1}</p>
+                    <p>{t.bioParagraph2}</p>
+                    <p>{t.bioParagraph3}</p>
+                    <p>{t.bioParagraph4}</p>
+                    <p>{t.bioParagraph5}</p>
+                  </div>
+
+                  <div
+                    className={`mt-8 flex items-center ${
+                      isRTL
+                        ? "justify-end space-x-reverse space-x-3"
+                        : "justify-start space-x-3"
+                    }`}
+                  >
+                    <Camera className="h-5 w-5 text-pink-600" />
+                    <span className="text-lg font-medium text-black dark:text-white">
+                      {t.photographerName}
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quote Section */}
+        <section className="py-24 bg-black relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-yellow-500 to-red-500" />
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Quote className="h-12 w-12 mx-auto mb-8 text-pink-500 opacity-50" />
+              <AnimatePresence mode="wait">
+                <motion.blockquote
+                  key={currentQuote}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-2xl md:text-4xl font-medium italic leading-relaxed max-w-4xl mx-auto mb-8 tracking-tight text-white"
+                >
+                  {currentQuote}
+                </motion.blockquote>
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Collections Section */}
+        <section
+          ref={collectionsSectionRef}
+          id="collections-section"
+          className="py-24 bg-gradient-to-br from-gray-900 to-black"
+        >
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <motion.h2
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
-                className={isRTL ? "text-right" : "text-left"}
+                className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
               >
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-black dark:text-white">
-                  {t.bioTitleLine1}
-                  <br />
-                  <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-500">
-                    {t.bioTitleHighlight}
-                  </span>
-                </h2>
-                <div className="text-gray-700 dark:text-gray-300 space-y-4 text-lg leading-relaxed">
-                  <p>{t.bioParagraph1}</p>
-                  <p>{t.bioParagraph2}</p>
-                  <p>{t.bioParagraph3}</p>
-                  <p>{t.bioParagraph4}</p>
-                  <p>{t.bioParagraph5}</p>
-                </div>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+                  {t.collectionsTitle}
+                </span>
+              </motion.h2>
+              <p className="text-lg text-gray-400 max-w-xl mx-auto">
+                {t.collectionsSubtitle}
+              </p>
+            </div>
 
-                <div
-                  className={`mt-8 flex items-center ${
-                    isRTL
-                      ? "justify-end space-x-reverse space-x-3"
-                      : "justify-start space-x-3"
-                  }`}
-                >
-                  <Camera className="h-5 w-5 text-pink-600" />
-                  <span className="text-lg font-medium text-black dark:text-white">
-                    {t.photographerName}
-                  </span>
-                </div>
-              </motion.div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              {baseCollectionsData.map((collection, index) => {
+                const translatedCollection = t.collectionItems[
+                  collection.imageKey
+                ] || {
+                  title: collection.imageKey,
+                };
+                return (
+                  <motion.div
+                    key={collection.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    onClick={() => {
+                      navigate(`/collection?id=${collection.id}&lang=${lang}`);
+                    }}
+                    className={`relative overflow-hidden group rounded-xl cursor-pointer transition-all duration-300 h-64 md:h-80 transform ${
+                      index % 2 === 0 ? "md:translate-y-12" : ""
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
+                    <img
+                      src={collection.images[0]}
+                      alt={translatedCollection.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div
+                      className={`absolute inset-0 z-20 flex flex-col p-6 ${
+                        isRTL
+                          ? "items-end text-right justify-end"
+                          : "items-start text-left justify-end"
+                      }`}
+                    >
+                      <h3 className="text-2xl font-bold mb-2 text-white">
+                        {translatedCollection.title}
+                      </h3>
+                      <div
+                        className={`flex items-center text-pink-400 font-medium ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        {!isRTL && (
+                          <ArrowRight className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                        )}
+                        <span>{t.viewCollection}</span>
+                        {isRTL && (
+                          <ArrowRight className="h-4 w-4 ml-2 group-hover:-translate-x-1 transition-transform transform rotate-180" />
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Quote Section */}
-      <section className="py-24 bg-black relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-yellow-500 to-red-500" />
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <Quote className="h-12 w-12 mx-auto mb-8 text-pink-500 opacity-50" />
-            <AnimatePresence mode="wait">
-              <motion.blockquote
-                key={currentQuote}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="text-2xl md:text-4xl font-medium italic leading-relaxed max-w-4xl mx-auto mb-8 tracking-tight text-white"
-              >
-                {currentQuote}
-              </motion.blockquote>
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Collections Section */}
-      <section
-        ref={collectionsSectionRef}
-        id="collections-section"
-        className="py-24 bg-gradient-to-br from-gray-900 to-black"
-      >
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <motion.h2
+        {/* Contact CTA */}
+        <section className="py-24 bg-white text-black dark:bg-gray-900 dark:text-white">
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
             >
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
-                {t.collectionsTitle}
-              </span>
-            </motion.h2>
-            <p className="text-lg text-gray-400 max-w-xl mx-auto">
-              {t.collectionsSubtitle}
-            </p>
+              {/* Logic to split CTA title for styling */}
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-black dark:text-white">
+                {t.ctaTitle.includes(
+                  pageTranslations.en.ctaTitle.split(" ")[2]
+                ) ? (
+                  <>
+                    {
+                      t.ctaTitle.split(
+                        pageTranslations[lang].ctaTitle.split(" ")[2]
+                      )[0]
+                    }
+                    <span className="text-pink-600">
+                      {pageTranslations[lang].ctaTitle.split(" ")[2]}
+                    </span>
+                    {
+                      t.ctaTitle.split(
+                        pageTranslations[lang].ctaTitle.split(" ")[2]
+                      )[1]
+                    }
+                  </>
+                ) : (
+                  t.ctaTitle
+                )}
+              </h2>
+              <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-10">
+                {t.ctaSubtitle}
+              </p>
+              <button
+                onClick={() => navigate(`/contact?lang=${lang}`)}
+                className="px-10 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 text-lg"
+              >
+                {t.ctaButton}
+              </button>
+            </motion.div>
           </div>
+        </section>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            {baseCollectionsData.map((collection, index) => {
-              const translatedCollection = t.collectionItems[
-                collection.imageKey
-              ] || {
-                title: collection.imageKey,
-              };
-              return (
-                <motion.div
-                  key={collection.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  onClick={() => {
-                    navigate(`/collection?id=${collection.id}&lang=${lang}`);
-                  }}
-                  className={`relative overflow-hidden group rounded-xl cursor-pointer transition-all duration-300 h-64 md:h-80 transform ${
-                    index % 2 === 0 ? "md:translate-y-12" : ""
-                  }`}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-10" />
-                  <img
-                    src={collection.images[0]}
-                    alt={translatedCollection.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div
-                    className={`absolute inset-0 z-20 flex flex-col p-6 ${
-                      isRTL
-                        ? "items-end text-right justify-end"
-                        : "items-start text-left justify-end"
-                    }`}
-                  >
-                    <h3 className="text-2xl font-bold mb-2 text-white">
-                      {translatedCollection.title}
-                    </h3>
-                    <div
-                      className={`flex items-center text-pink-400 font-medium ${
-                        isRTL ? "flex-row-reverse" : ""
-                      }`}
-                    >
-                      {!isRTL && (
-                        <ArrowRight className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                      )}
-                      <span>{t.viewCollection}</span>
-                      {isRTL && (
-                        <ArrowRight className="h-4 w-4 ml-2 group-hover:-translate-x-1 transition-transform transform rotate-180" />
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact CTA */}
-      <section className="py-24 bg-white text-black dark:bg-gray-900 dark:text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            {/* Logic to split CTA title for styling */}
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-black dark:text-white">
-              {t.ctaTitle.includes(
-                pageTranslations.en.ctaTitle.split(" ")[2]
-              ) ? (
-                <>
-                  {
-                    t.ctaTitle.split(
-                      pageTranslations[lang].ctaTitle.split(" ")[2]
-                    )[0]
-                  }
-                  <span className="text-pink-600">
-                    {pageTranslations[lang].ctaTitle.split(" ")[2]}
-                  </span>
-                  {
-                    t.ctaTitle.split(
-                      pageTranslations[lang].ctaTitle.split(" ")[2]
-                    )[1]
-                  }
-                </>
-              ) : (
-                t.ctaTitle
-              )}
-            </h2>
-            <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-10">
-              {t.ctaSubtitle}
-            </p>
-            <button
-              onClick={() => navigate(`/contact?lang=${lang}`)}
-              className="px-10 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 text-lg"
-            >
-              {t.ctaButton}
-            </button>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-16 bg-gradient-to-b from-black to-gray-900 border-t border-gray-800">
-        <div className="container mx-auto px-4">
-          <div
-            className={`flex flex-col md:justify-between md:items-center gap-8 ${
-              isRTL ? "md:flex-row-reverse text-right" : "md:flex-row text-left"
-            }`}
-          >
+        {/* Footer */}
+        <footer className="py-16 bg-gradient-to-b from-black to-gray-900 border-t border-gray-800">
+          <div className="container mx-auto px-4">
             <div
-              className={`space-y-4 ${
-                isRTL ? "md:text-right" : "md:text-left"
+              className={`flex flex-col md:justify-between md:items-center gap-8 ${
+                isRTL
+                  ? "md:flex-row-reverse text-right"
+                  : "md:flex-row text-left"
               }`}
             >
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
-                {t.footerName}
-              </h2>
-              <p className="text-gray-300 text-lg">{t.footerTagline}</p>
-            </div>
-            <div className="flex flex-col items-center md:items-end gap-4">
-              <div className="flex gap-4">
-                <a
-                  href="https://www.instagram.com/myisraeliview?igsh=MTh1cHBkaGpnazRscg=="
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                >
-                  <InstagramIcon className="w-5 h-5 text-gray-300" />
-                </a>
-                <a
-                  href="https://api.whatsapp.com/send?phone=972548005704&text=אני+מעוניין+בצלם++"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                >
-                  <WhatsAppIcon className="w-5 h-5 text-gray-300" />
-                </a>
+              <div
+                className={`space-y-4 ${
+                  isRTL ? "md:text-right" : "md:text-left"
+                }`}
+              >
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+                  {t.footerName}
+                </h2>
+                <p className="text-gray-300 text-lg">{t.footerTagline}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <p className="text-gray-400 text-sm">
-                  {t.footerCopyright.replace(
-                    "{year}",
-                    new Date().getFullYear()
-                  )}
-                </p>
-                <span className="text-gray-400 text-sm">•</span>
-                <p className="text-sm font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent hover:from-pink-600 hover:to-orange-600 transition-all duration-300">
-                  {t.footerBuiltBy}
-                </p>
+              <div className="flex flex-col items-center md:items-end gap-4">
+                <div className="flex gap-4">
+                  <a
+                    href="https://www.instagram.com/myisraeliview?igsh=MTh1cHBkaGpnazRscg=="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                  >
+                    <InstagramIcon className="w-5 h-5 text-gray-300" />
+                  </a>
+                  <a
+                    href="https://api.whatsapp.com/send?phone=972548005704&text=אני+מעוניין+בצלם++"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                  >
+                    <WhatsAppIcon className="w-5 h-5 text-gray-300" />
+                  </a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-gray-400 text-sm">
+                    {t.footerCopyright.replace(
+                      "{year}",
+                      new Date().getFullYear()
+                    )}
+                  </p>
+                  <span className="text-gray-400 text-sm">•</span>
+                  <p className="text-sm font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent hover:from-pink-600 hover:to-orange-600 transition-all duration-300">
+                    {t.footerBuiltBy}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }
