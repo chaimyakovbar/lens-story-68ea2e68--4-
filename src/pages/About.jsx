@@ -1,6 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Camera, Award, Users, Globe } from "lucide-react";
+import img1 from "../assets/JV1A2976.jpg";
+import img2 from "../assets/JV1A2929.jpg";
 
 const pageTranslations = {
   en: {
@@ -65,7 +67,7 @@ export default function About({ lang = "en" }) {
         >
           <div className="absolute inset-0 bg-black/50 z-10" />
           <img
-            src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+            src={img1}
             alt={t.pageTitle}
             className="w-full h-full object-cover"
           />
@@ -133,7 +135,7 @@ export default function About({ lang = "en" }) {
               className={isRTL ? "md:col-start-2" : ""}
             >
               <img
-                src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                src={img2}
                 alt={t.storyTitle}
                 className="rounded-lg shadow-2xl"
               />
