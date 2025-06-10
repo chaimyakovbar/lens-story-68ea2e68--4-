@@ -36,9 +36,9 @@ const pageTranslations = {
   he: {
     pageTitle: "צור קשר",
     pageSubtitle: "בואו ניצור משהו מדהים ביחד",
-    formTitle: "שלח לנו הודעה",
+    formTitle: "שלח לי הודעה",
     formSubtitle:
-      "נשמח לשמוע ממך. מלא את הטופס למטה ואנו נחזור אליך בהקדם האפשרי.",
+      "אשמח לשמוע ממך. מלא את הטופס למטה ואני אחזור אליך בהקדם האפשרי.",
     firstNameLabel: "שם פרטי",
     firstNamePlaceholder: "יוסי",
     lastNameLabel: "שם משפחה",
@@ -46,11 +46,11 @@ const pageTranslations = {
     emailLabel: "אימייל",
     emailPlaceholder: "yossi@example.com",
     messageLabel: "הודעה",
-    messagePlaceholder: "ספר לנו על הפרויקט שלך...",
+    messagePlaceholder: "ספר לי על הפרויקט שלך...",
     sendButton: "שלח הודעה",
     sendingButton: "שולח...",
     infoTitle: "פרטי התקשרות",
-    infoSubtitle: "פנה אלינו דרך אחד מהערוצים הבאים ואנו נגיב תוך 24 שעות.",
+    infoSubtitle: "פנה אלי דרך אחד מהערוצים הבאים ואני נגיב תוך 24 שעות.",
     phone: { title: "טלפון", details: "0548005704" }, // Details can be static
     email: { title: "אימייל", details: "8005704@gmail.com" },
     emailSuccess: "ההודעה שלך נשלחה בהצלחה! נחזור אליך בהקדם.",

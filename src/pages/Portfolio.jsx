@@ -156,16 +156,16 @@ const pageTranslations = {
   },
   he: {
     title: "תיק",
-    titleHighlight: "העבודות שלנו",
+    titleHighlight: "העבודות שלי",
     subtitle:
-      "חקרו את האוסף המגוון שלנו של עבודות צילום בתחומים וסגנונות שונים.",
+      "חקרו את האוסף המגוון שלי של עבודות צילום בתחומים וסגנונות שונים.",
     categories: {
       All: "הכל",
       wedding: "חתונה",
       "bar-mitzvah": "בר מצווה",
       "bat-mitzvah": "בת מצווה",
       circumcision: "ברית מילה",
-      tefilin: "תפילין",
+      tefilin: "הנחת תפילין",
       designs: "עיצובים",
       business: "אירועים עסקיים",
       haircut: "חלאקה",
@@ -192,7 +192,7 @@ const pageTranslations = {
         description: "שימור רגעים יקרים במשפחה",
       },
       {
-        title: "תפילין",
+        title: "הנחת תפילין",
         description: "תיעוד רגעים רוחניים ביראת כבוד",
       },
       {

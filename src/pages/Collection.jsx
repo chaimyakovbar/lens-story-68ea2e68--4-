@@ -105,7 +105,7 @@ const pageTranslations = {
       { title: "בר מצווה", description: "חגיגת אבן דרך משמעותית בסטייל" },
       { title: "בת מצווה", description: "תיעוד חגיגה משמעותית" },
       { title: "ברית מילה", description: "שימור רגעים יקרים במשפחה" },
-      { title: "תפילין", description: "תיעוד רגעים רוחניים ביראת כבוד" },
+      { title: "הנחת תפילין", description: "תיעוד רגעים רוחניים ביראת כבוד" },
       {
         title: "עיצוב",
         description: "הצגת קומפוזיציות אמנותיות ויצירתיות",
@@ -157,7 +157,6 @@ export default function Collection() {
           .map(([path, module]) => {
             return module.default;
           });
-
 
         // Filter out the header image if it exists in the folder
         const filteredImages = folderImages.filter(
