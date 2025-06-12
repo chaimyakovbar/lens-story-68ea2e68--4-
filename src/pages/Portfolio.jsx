@@ -69,7 +69,7 @@ export const portfolioItemsData = [
     id: "porpusal",
     categoryKey: "porpusal",
     image: img0028,
-    folderPath: "proposal",
+    folderPath: "porpusal",
   },
   {
     id: "engagement",
@@ -102,7 +102,7 @@ const pageTranslations = {
       designs: "Designs",
       business: "Business",
       haircut: "First Haircut",
-      porpusal: "Proposal",
+      porpusal: "proposal",
       engagement: "Engagement",
       torah: "Torah",
     },
