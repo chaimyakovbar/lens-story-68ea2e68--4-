@@ -50,7 +50,7 @@ const pageTranslations = {
     sendButton: "שלח הודעה",
     sendingButton: "שולח...",
     infoTitle: "פרטי התקשרות",
-    infoSubtitle: "פנה אלי דרך אחד מהערוצים הבאים ואני נגיב תוך 24 שעות.",
+    infoSubtitle: "פנה אלי דרך אחד מהערוצים הבאים ואני אגיב תוך 24 שעות.",
     phone: { title: "טלפון", details: "0548005704" }, // Details can be static
     email: { title: "אימייל", details: "8005704@gmail.com" },
     emailSuccess: "ההודעה שלך נשלחה בהצלחה! נחזור אליך בהקדם.",

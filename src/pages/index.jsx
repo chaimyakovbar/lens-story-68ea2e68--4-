@@ -54,12 +54,27 @@ function PagesContent({ lang, toggleLanguage }) {
   const location = useLocation();
   const currentPage = _getCurrentPage(location.pathname);
 
-  // Force Hebrew if no language is specified in URL
+  // Remove the force Hebrew redirect
   useEffect(() => {
-    if (!location.search.includes("lang=")) {
-      window.location.href = `${location.pathname}?lang=he`;
+    // Get language from URL or localStorage
+    const urlParams = new URLSearchParams(location.search);
+    const urlLang = urlParams.get("lang");
+    const storedLang = localStorage.getItem("appLanguage");
+
+    // If URL has a language parameter, use it and update localStorage
+    if (urlLang) {
+      localStorage.setItem("appLanguage", urlLang);
+      if (urlLang !== lang) {
+        toggleLanguage(); // This will update the language state
+      }
     }
-  }, [location]);
+    // If no URL parameter but we have a stored language, update URL
+    else if (storedLang) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set("lang", storedLang);
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [location.search, lang, toggleLanguage]);
 
   return (
     <Layout
@@ -69,7 +84,7 @@ function PagesContent({ lang, toggleLanguage }) {
     >
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Navigate to="/Home?lang=he" replace />} />
+        <Route path="/" element={<Navigate to="/Home" replace />} />
         <Route path="/Home" element={<Home lang={lang} />} />
         <Route path="/Portfolio" element={<Portfolio lang={lang} />} />
         <Route path="/About" element={<About lang={lang} />} />
@@ -82,19 +97,15 @@ function PagesContent({ lang, toggleLanguage }) {
 
 export default function Pages() {
   const [lang, setLang] = useState(() => {
-    // Force Hebrew as default
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const urlLang = urlParams.get("lang");
+      const storedLang = localStorage.getItem("appLanguage");
 
-      if (urlLang) {
-        localStorage.setItem("appLanguage", urlLang);
-        return urlLang;
-      }
-
-      // If no language in URL, force Hebrew
-      localStorage.setItem("appLanguage", "he");
-      return "he";
+      // Use URL language if available, otherwise use stored language, default to Hebrew
+      const initialLang = urlLang || storedLang || "he";
+      localStorage.setItem("appLanguage", initialLang);
+      return initialLang;
     }
     return "he";
   });
@@ -102,6 +113,8 @@ export default function Pages() {
   const toggleLanguage = () => {
     const newLang = lang === "en" ? "he" : "en";
     setLang(newLang);
+    localStorage.setItem("appLanguage", newLang);
+
     // Update URL with new language
     const url = new URL(window.location.href);
     url.searchParams.set("lang", newLang);
@@ -110,7 +123,6 @@ export default function Pages() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("appLanguage", lang);
       document.documentElement.lang = lang;
       document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
     }

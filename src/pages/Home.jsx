@@ -66,7 +66,12 @@ const pageTranslations = {
     bioParagraph5:
       "I invite you to join me on a journey where we'll build memories that will stay with you forever – let's capture your story, your moments, your life.",
     photographerName: "Netanel, Your Photographer",
-
+    quotes: [
+      "Photography is the story I fail to put into words.",
+      "When words become unclear, I shall focus with photographs.",
+      "What I like about photographs is that they capture a moment that's gone forever.",
+      "A photograph is a secret about a secret. The more it tells you, the less you know.",
+    ],
     collectionsTitle: "Photography Collections",
     collectionsSubtitle:
       "Explore different genres and events through the lens of artistic expression",
@@ -115,6 +120,12 @@ const pageTranslations = {
     bioParagraph5:
       "אני מזמין אותך לצאת איתי למסע שבו נבנה זיכרונות שישארו איתך לנצח – בואו נצלם את הסיפור שלך, את הרגעים שלך, את החיים שלך.",
     photographerName: "נתנאל, הצלם שלך",
+    quotes: [
+      "צילום הוא הסיפור שאני לא מצליח לבטא במילים.",
+      "כשהמילים נעשות לא ברורות, אתמקד בצילומים.",
+      "מה שאני אוהב בצילומים זה שהם לוכדים רגע שנעלם לנצח.",
+      "צילום הוא סוד על סוד. ככל שהוא מספר לך יותר, אתה יודע פחות.",
+    ],
     collectionsTitle: "אוספי צילום",
     collectionsSubtitle: "חקרו ז'אנרים ואירועים שונים דרך עדשת הביטוי האמנותי",
     collectionItems: {
@@ -137,7 +148,7 @@ const pageTranslations = {
     ctaSubtitle:
       "בואו ניצור משהו יוצא דופן ביחד. ממפגשים אינטימיים ועד חגיגות מפוארות, אני כאן כדי לתעד את הרגעים המיוחדים שלכם בסטייל ויצירתיות.",
     ctaButton: "צור קשר",
-    footerName: "נתנאל לווינשטיין",
+    footerName: "נתנאל לוונשטיין",
     footerTagline: "מומחה צילום אירועים",
     footerCopyright: "© {year} כל הזכויות שמורות",
     footerBuiltBy: "נבנה על ידי MCD webs",
@@ -166,7 +177,24 @@ export default function Home({ lang }) {
     );
     setAllHeroImages(images);
   }, []);
+  useEffect(() => {
+    if (t && t.quotes && t.quotes.length > 0) {
+      setCurrentQuote(t.quotes[0]);
+      setQuoteIndex(0);
+    }
+  }, [t]);
 
+  useEffect(() => {
+    if (!t || !t.quotes || t.quotes.length === 0) return;
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => {
+        const next = (prev + 1) % t.quotes.length;
+        setCurrentQuote(t.quotes[next]);
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [t]);
   useEffect(() => {
     if (allHeroImages.length === 0) return;
     const interval = setInterval(() => {
@@ -182,7 +210,7 @@ export default function Home({ lang }) {
       <div className="relative overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
         {/* Hero Section */}
         <section className="relative h-screen">
-              {/* בלי טישטוש */}
+          {/* בלי טישטוש */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentImageIndex}
@@ -201,7 +229,7 @@ export default function Home({ lang }) {
               )}
             </motion.div>
           </AnimatePresence>
-      
+
           {/* עם טישטוש */}
           {/* <AnimatePresence mode="wait">
             <motion.div
@@ -307,7 +335,7 @@ export default function Home({ lang }) {
                   <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-black dark:text-white">
                     {t.bioTitleLine1}
                     <br />
-                    <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-500">
+                    <span className="italic text-black">
                       {t.bioTitleHighlight}
                     </span>
                   </h2>
@@ -337,6 +365,33 @@ export default function Home({ lang }) {
           </div>
         </section>
 
+        {/* Quote Section */}
+        <section className="py-24 bg-black relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-yellow-500 to-red-500" />
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Quote className="h-12 w-12 mx-auto mb-8 text-pink-500 opacity-50" />
+              <AnimatePresence mode="wait">
+                <motion.blockquote
+                  key={currentQuote}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-2xl md:text-4xl font-medium italic leading-relaxed max-w-4xl mx-auto mb-8 tracking-tight text-white"
+                >
+                  {currentQuote}
+                </motion.blockquote>
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Collections Section */}
         <section
           ref={collectionsSectionRef}
@@ -352,9 +407,7 @@ export default function Home({ lang }) {
                 viewport={{ once: true }}
                 className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
               >
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
-                  {t.collectionsTitle}
-                </span>
+                <span className="italic">{t.collectionsTitle}</span>
               </motion.h2>
               <p className="text-lg text-gray-400 max-w-xl mx-auto">
                 {t.collectionsSubtitle}
@@ -480,7 +533,7 @@ export default function Home({ lang }) {
                   isRTL ? "md:text-right" : "md:text-left"
                 }`}
               >
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+                <h2 style={{ fontSize: "30px" }} className="italic">
                   {t.footerName}
                 </h2>
                 <p className="text-gray-300 text-lg">{t.footerTagline}</p>

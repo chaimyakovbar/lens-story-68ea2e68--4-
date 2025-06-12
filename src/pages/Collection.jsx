@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import { portfolioItemsData } from "./Portfolio"; // Using the base data
 import { ImageList, ImageListItem } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useInView } from "react-intersection-observer";
 
 // Styled components for MUI
 const StyledImageList = styled(ImageList)(({ theme }) => ({
@@ -43,6 +44,31 @@ const ImageOverlay = styled("div")({
   alignItems: "center",
   justifyContent: "center",
 });
+
+const LazyLoadedImage = ({ src, alt, onClick }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: "50px 0px",
+  });
+
+  return (
+    <div ref={ref}>
+      {inView ? (
+        <img
+          src={src}
+          alt={alt}
+          onClick={onClick}
+          loading="lazy"
+          style={{ width: "100%", height: "auto" }}
+        />
+      ) : (
+        <div
+          style={{ width: "100%", height: "auto", backgroundColor: "#f3f4f6" }}
+        />
+      )}
+    </div>
+  );
+};
 
 // Translations for Collection page
 const pageTranslations = {
@@ -96,7 +122,7 @@ const pageTranslations = {
     ],
   },
   he: {
-    backToPortfolio: "חזרה לתיק העבודות",
+    backToPortfolio: "חזרה לגלריה",
     portfolioMeta: [
       {
         title: "חתונה",
@@ -238,11 +264,10 @@ export default function Collection() {
                 key={index}
                 onClick={() => setSelectedImage(image)}
               >
-                <img
+                <LazyLoadedImage
                   src={image}
                   alt={`${collectionTranslatedMeta.title} ${index + 1}`}
-                  loading="lazy"
-                  style={{ width: "100%", height: "auto" }}
+                  onClick={() => setSelectedImage(image)}
                 />
                 <ImageOverlay className="overlay">
                   <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">

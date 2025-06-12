@@ -27,7 +27,7 @@ import AccessibilityMenu from "../components/AccessibilityMenu";
 const layoutTranslations = {
   he: {
     home: "בית",
-    portfolio: "תיק עבודות",
+    portfolio: "לגלריה",
     about: "אודות",
     contact: "צור קשר",
     languageToggle: "English",
@@ -185,9 +185,7 @@ export default function Layout({
               <motion.div
                 whileHover={{ rotate: 180 }}
                 transition={{ duration: 0.3 }}
-              >
-                <Camera className="h-8 w-8 text-primary" />
-              </motion.div>
+              ></motion.div>
               <span className="font-bold text-xl">
                 <img
                   src={isDark ? logoWhite : logoBlack}
@@ -317,28 +315,30 @@ export default function Layout({
 
               <div
                 className={`flex flex-col mt-8 ${
-                  lang === "he"
-                    ? "space-y-reverse space-y-8 items-end"
-                    : "space-y-8 items-start"
+                  lang === "he" ? "items-end" : "items-start"
                 }`}
               >
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      // Ensure page content re-renders if it depends on lang from URL for some reason
-                      // This shouldn't be necessary if pages correctly use the lang prop
-                    }}
-                    className={`flex items-center text-xl ${
-                      lang === "he" ? "space-x-reverse space-x-4" : "space-x-4"
-                    } ${location.pathname === item.path ? "text-primary" : ""}`}
-                  >
-                    <item.icon className="h-6 w-6" />
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
+                <div className="flex flex-col w-full justify-between gap-6">
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                      }}
+                      className={`flex items-center text-xl ${
+                        lang === "he"
+                          ? "space-x-reverse space-x-4"
+                          : "space-x-4"
+                      } ${
+                        location.pathname === item.path ? "text-primary" : ""
+                      }`}
+                    >
+                      <item.icon className="h-6 w-6" />
+                      <span>{item.name}</span>
+                    </Link>
+                  ))}
+                </div>
 
                 <div
                   className={`flex pt-8 ${
