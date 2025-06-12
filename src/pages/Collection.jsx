@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X } from "lucide-react"; // Removed ArrowRight as it's handled by RTL logic
-import { Link, useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { ArrowLeft, X } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { portfolioItemsData } from "./Portfolio"; // Using the base data
+import { portfolioItemsData } from "./Portfolio";
 import { ImageList, ImageListItem } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useInView } from "react-intersection-observer";
-import PropTypes from "prop-types";
 
 // Styled components for MUI
 const StyledImageList = styled(ImageList)(({ theme }) => ({
@@ -46,104 +44,97 @@ const ImageOverlay = styled("div")({
   justifyContent: "center",
 });
 
-const LazyLoadedImage = ({ src, alt, onClick, onLoad }) => {
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    rootMargin: "50px 0px",
-  });
-
-  return (
-    <div ref={ref}>
-      {inView ? (
-        <img
-          src={src}
-          alt={alt}
-          onClick={onClick}
-          loading="lazy"
-          style={{ width: "100%", height: "auto" }}
-          onLoad={onLoad}
-        />
-      ) : (
-        <div
-          style={{ width: "100%", height: "auto", backgroundColor: "#f3f4f6" }}
-        />
-      )}
-    </div>
-  );
-};
-
-LazyLoadedImage.propTypes = {
-  src: PropTypes.string.isRequired,
-  alt: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  onLoad: PropTypes.func.isRequired,
-};
-
-const SequentialImageLoader = ({ images, onImageClick, isRTL }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleImageLoad = () => {
-    if (currentIndex < images.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    }
-  };
+// Sequential image loading component
+const SequentialImage = ({ src, alt, onClick, shouldLoad, onLoad }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // Reset state when images prop changes
-    setCurrentIndex(0);
-  }, [images]);
+    if (!shouldLoad) return;
 
-  useEffect(() => {
-    if (currentIndex < images.length) {
-      // Trigger loading of next image
-      setCurrentIndex((prev) => prev + 1);
-    }
-  }, [currentIndex, images]);
+    const img = new Image();
+    
+    img.onload = () => {
+      setImageLoaded(true);
+      onLoad(); // Notify parent that this image has loaded
+    };
+    
+    img.onerror = () => {
+      setHasError(true);
+      onLoad(); // Still notify parent to continue with next image
+    };
+    
+    img.src = src;
+  }, [shouldLoad, src, onLoad]);
+
+  if (!shouldLoad) {
+    // Show placeholder while waiting to load
+    return (
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "4/3", // Default aspect ratio for placeholder
+          backgroundColor: "#f3f4f6",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "8px",
+        }}
+      >
+        <div className="animate-pulse w-8 h-8 bg-gray-300 rounded"></div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "4/3",
+          backgroundColor: "#fee2e2",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "8px",
+          color: "#dc2626",
+        }}
+      >
+        Failed to load
+      </div>
+    );
+  }
+
+  if (!imageLoaded) {
+    // Show loading state
+    return (
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "4/3",
+          backgroundColor: "#f3f4f6",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "8px",
+        }}
+      >
+        <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
-    <StyledImageList variant="masonry" cols={3} gap={16}>
-      {images.map((image, index) => (
-        <ImageListItem key={index} onClick={() => onImageClick(image)}>
-          {index <= currentIndex ? (
-            <LazyLoadedImage
-              src={image}
-              alt={`Gallery image ${index + 1}`}
-              onClick={() => onImageClick(image)}
-              onLoad={handleImageLoad}
-            />
-          ) : (
-            <div
-              style={{
-                width: "100%",
-                height: "200px",
-                backgroundColor: "#f3f4f6",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div className="animate-pulse">Loading...</div>
-            </div>
-          )}
-          <ImageOverlay className="overlay">
-            <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
-              <ArrowLeft
-                className={`h-5 w-5 text-white transform ${
-                  isRTL ? "rotate-0" : "rotate-180"
-                }`}
-              />
-            </div>
-          </ImageOverlay>
-        </ImageListItem>
-      ))}
-    </StyledImageList>
+    <motion.img
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      src={src}
+      alt={alt}
+      onClick={onClick}
+      style={{ width: "100%", height: "auto" }}
+    />
   );
-};
-
-SequentialImageLoader.propTypes = {
-  images: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onImageClick: PropTypes.func.isRequired,
-  isRTL: PropTypes.bool.isRequired,
 };
 
 // Translations for Collection page
@@ -225,12 +216,13 @@ export default function Collection() {
   const [collection, setCollection] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
+  const [loadedImageIndex, setLoadedImageIndex] = useState(0); // Track which images should load
   const navigate = useNavigate();
-  const location = useLocation(); // For accessing query params
+  const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
   const collectionId = queryParams.get("id");
-  const lang = queryParams.get("lang") || "en"; // Get lang from query param or default
+  const lang = queryParams.get("lang") || "en";
 
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
@@ -241,7 +233,7 @@ export default function Collection() {
     );
 
     if (!foundCollection) {
-      navigate(createPageUrl("Portfolio")); // Navigate to portfolio if not found
+      navigate(createPageUrl("Portfolio"));
       return;
     }
     setCollection(foundCollection);
@@ -266,6 +258,7 @@ export default function Collection() {
         );
 
         setAdditionalImages(filteredImages);
+        setLoadedImageIndex(0); // Reset loading state
       } catch (error) {
         console.error("Error loading images:", error);
       }
@@ -273,6 +266,11 @@ export default function Collection() {
 
     importImages();
   }, [collectionId, navigate]);
+
+  // Handle sequential image loading
+  const handleImageLoad = () => {
+    setLoadedImageIndex(prev => prev + 1);
+  };
 
   if (!collection) return null;
 
@@ -324,7 +322,8 @@ export default function Collection() {
           transition={{ delay: 0.2 }}
           className="mb-12 relative"
         ></motion.div>
-        {/* Masonry Gallery */}
+
+        {/* Masonry Gallery with Sequential Loading */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -334,11 +333,54 @@ export default function Collection() {
           <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             {isRTL ? "גלריית תמונות" : "Photo Gallery"}
           </h3>
-          <SequentialImageLoader
-            images={additionalImages}
-            onImageClick={setSelectedImage}
-            isRTL={isRTL}
-          />
+          
+          {/* Loading Progress Indicator */}
+          {loadedImageIndex < additionalImages.length && (
+            <div className="mb-6 text-center">
+              <div className="text-sm text-gray-600 mb-2">
+                {isRTL ? "טוען תמונות" : "Loading images"} ({loadedImageIndex + 1}/{additionalImages.length})
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 max-w-md mx-auto">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${((loadedImageIndex + 1) / additionalImages.length) * 100}%`,
+                  }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          <StyledImageList variant="masonry" cols={3} gap={16}>
+            {additionalImages.map((image, index) => (
+              <ImageListItem
+                key={index}
+                onClick={loadedImageIndex > index ? () => setSelectedImage(image) : undefined}
+                style={{
+                  cursor: loadedImageIndex > index ? "pointer" : "default",
+                }}
+              >
+                <SequentialImage
+                  src={image}
+                  alt={`${collectionTranslatedMeta.title} ${index + 1}`}
+                  onClick={loadedImageIndex > index ? () => setSelectedImage(image) : undefined}
+                  shouldLoad={loadedImageIndex >= index}
+                  onLoad={handleImageLoad}
+                />
+                {loadedImageIndex > index && (
+                  <ImageOverlay className="overlay">
+                    <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                      <ArrowLeft
+                        className={`h-5 w-5 text-white transform ${
+                          isRTL ? "rotate-0" : "rotate-180"
+                        }`}
+                      />
+                    </div>
+                  </ImageOverlay>
+                )}
+              </ImageListItem>
+            ))}
+          </StyledImageList>
         </motion.div>
 
         {/* Lightbox */}
@@ -348,7 +390,7 @@ export default function Collection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4" // Increased z-index
+              className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
               onClick={() => setSelectedImage(null)}
             >
               <button
@@ -368,7 +410,7 @@ export default function Collection() {
                 src={selectedImage}
                 alt="Selected"
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
+                onClick={(e) => e.stopPropagation()}
               />
 
               {/* Navigation dots for lightbox */}
