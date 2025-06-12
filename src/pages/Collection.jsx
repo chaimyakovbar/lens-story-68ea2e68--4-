@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -44,83 +44,138 @@ const ImageOverlay = styled("div")({
   justifyContent: "center",
 });
 
-// Sequential image loading component
-const SequentialImage = ({ src, alt, onClick, shouldLoad, onLoad }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
+// Hook for Intersection Observer
+const useIntersectionObserver = (options = {}) => {
+  const [entries, setEntries] = useState([]);
+  const observer = useRef();
+
+  const observe = useCallback(
+    (element) => {
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((observedEntries) => {
+        setEntries(observedEntries);
+      }, options);
+
+      if (element) observer.current.observe(element);
+    },
+    [JSON.stringify(options)]
+  );
+
+  const unobserve = useCallback((element) => {
+    if (observer.current && element) {
+      observer.current.unobserve(element);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!shouldLoad) return;
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, []);
+
+  return { entries, observe, unobserve };
+};
+
+// Enhanced Sequential image loading component with better performance
+const SequentialImage = ({
+  src,
+  alt,
+  onClick,
+  shouldLoad,
+  onLoad,
+  index = 0,
+  loadingMethod = "sequential",
+  intersectionOptions = {},
+}) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isVisible, setIsVisible] = useState(loadingMethod !== "intersection");
+  const elementRef = useRef();
+
+  // Intersection Observer for viewport-based loading
+  const { entries, observe } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "100px",
+    ...intersectionOptions,
+  });
+
+  // Handle intersection observer
+  useEffect(() => {
+    if (loadingMethod === "intersection" && elementRef.current) {
+      observe(elementRef.current);
+    }
+  }, [observe, loadingMethod]);
+
+  useEffect(() => {
+    if (loadingMethod === "intersection") {
+      const entry = entries.find((e) => e.target === elementRef.current);
+      if (entry && entry.isIntersecting && !isVisible) {
+        setIsVisible(true);
+      }
+    }
+  }, [entries, isVisible, loadingMethod]);
+
+  // Handle image loading
+  useEffect(() => {
+    if (!shouldLoad || !isVisible) return;
 
     const img = new Image();
-    
+
     img.onload = () => {
       setImageLoaded(true);
-      onLoad(); // Notify parent that this image has loaded
+      onLoad?.(); // Notify parent that this image has loaded
     };
-    
+
     img.onerror = () => {
       setHasError(true);
-      onLoad(); // Still notify parent to continue with next image
+      onLoad?.(); // Still notify parent to continue with next image
     };
-    
-    img.src = src;
-  }, [shouldLoad, src, onLoad]);
 
-  if (!shouldLoad) {
-    // Show placeholder while waiting to load
+    img.src = src;
+  }, [shouldLoad, isVisible, src, onLoad]);
+
+  // Placeholder component
+  const Placeholder = ({ children }) => (
+    <div
+      ref={elementRef}
+      style={{
+        width: "100%",
+        aspectRatio: "4/3",
+        backgroundColor: "#f3f4f6",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "8px",
+      }}
+    >
+      {children}
+    </div>
+  );
+
+  if (!isVisible || (!shouldLoad && loadingMethod === "sequential")) {
     return (
-      <div
-        style={{
-          width: "100%",
-          aspectRatio: "4/3", // Default aspect ratio for placeholder
-          backgroundColor: "#f3f4f6",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "8px",
-        }}
-      >
+      <Placeholder>
         <div className="animate-pulse w-8 h-8 bg-gray-300 rounded"></div>
-      </div>
+      </Placeholder>
     );
   }
 
   if (hasError) {
     return (
-      <div
-        style={{
-          width: "100%",
-          aspectRatio: "4/3",
-          backgroundColor: "#fee2e2",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "8px",
-          color: "#dc2626",
-        }}
-      >
-        Failed to load
-      </div>
+      <Placeholder>
+        <div style={{ color: "#dc2626", backgroundColor: "#fee2e2" }}>
+          Failed to load
+        </div>
+      </Placeholder>
     );
   }
 
   if (!imageLoaded) {
-    // Show loading state
     return (
-      <div
-        style={{
-          width: "100%",
-          aspectRatio: "4/3",
-          backgroundColor: "#f3f4f6",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "8px",
-        }}
-      >
+      <Placeholder>
         <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full"></div>
-      </div>
+      </Placeholder>
     );
   }
 
@@ -128,7 +183,11 @@ const SequentialImage = ({ src, alt, onClick, shouldLoad, onLoad }) => {
     <motion.img
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{
+        duration: 0.5,
+        delay: loadingMethod === "sequential" ? index * 0.1 : 0,
+        ease: "easeOut",
+      }}
       src={src}
       alt={alt}
       onClick={onClick}
@@ -137,7 +196,52 @@ const SequentialImage = ({ src, alt, onClick, shouldLoad, onLoad }) => {
   );
 };
 
-// Translations for Collection page
+// Loading configuration options
+const LOADING_METHODS = {
+  SEQUENTIAL: "sequential",
+  INTERSECTION: "intersection",
+  BATCH: "batch",
+};
+
+// Batch loading hook
+const useBatchLoading = (items, batchSize = 5, delay = 1000) => {
+  const [loadedBatches, setLoadedBatches] = useState(0);
+
+  const loadNextBatch = useCallback(() => {
+    setLoadedBatches((prev) =>
+      Math.min(prev + 1, Math.ceil(items.length / batchSize))
+    );
+  }, [items.length, batchSize]);
+
+  const shouldItemLoad = useCallback(
+    (index) => {
+      const batchIndex = Math.floor(index / batchSize);
+      return batchIndex < loadedBatches;
+    },
+    [batchSize, loadedBatches]
+  );
+
+  useEffect(() => {
+    if (loadedBatches === 0) {
+      // Load first batch immediately
+      setLoadedBatches(1);
+      return;
+    }
+
+    if (loadedBatches < Math.ceil(items.length / batchSize)) {
+      const timer = setTimeout(loadNextBatch, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [loadedBatches, items.length, batchSize, delay, loadNextBatch]);
+
+  return {
+    shouldItemLoad,
+    loadedBatches,
+    totalBatches: Math.ceil(items.length / batchSize),
+  };
+};
+
+// Translations for Collection page (same as original)
 const pageTranslations = {
   en: {
     backToPortfolio: "Back to Portfolio",
@@ -216,7 +320,11 @@ export default function Collection() {
   const [collection, setCollection] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
-  const [loadedImageIndex, setLoadedImageIndex] = useState(0); // Track which images should load
+  const [loadedImageIndex, setLoadedImageIndex] = useState(0);
+  const [loadingMethod, setLoadingMethod] = useState(
+    LOADING_METHODS.SEQUENTIAL
+  );
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -226,6 +334,13 @@ export default function Collection() {
 
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
+
+  // Batch loading hook
+  const { shouldItemLoad, loadedBatches, totalBatches } = useBatchLoading(
+    additionalImages,
+    6, // Load 6 images per batch
+    2000 // 2 second delay between batches
+  );
 
   useEffect(() => {
     const foundCollection = portfolioItemsData.find(
@@ -268,9 +383,26 @@ export default function Collection() {
   }, [collectionId, navigate]);
 
   // Handle sequential image loading
-  const handleImageLoad = () => {
-    setLoadedImageIndex(prev => prev + 1);
-  };
+  const handleImageLoad = useCallback(() => {
+    setLoadedImageIndex((prev) => prev + 1);
+  }, []);
+
+  // Determine if image should load based on method
+  const shouldImageLoad = useCallback(
+    (index) => {
+      switch (loadingMethod) {
+        case LOADING_METHODS.SEQUENTIAL:
+          return loadedImageIndex >= index;
+        case LOADING_METHODS.BATCH:
+          return shouldItemLoad(index);
+        case LOADING_METHODS.INTERSECTION:
+          return true; // Intersection observer handles this internally
+        default:
+          return true;
+      }
+    },
+    [loadingMethod, loadedImageIndex, shouldItemLoad]
+  );
 
   if (!collection) return null;
 
@@ -281,6 +413,27 @@ export default function Collection() {
     title: collection.id,
     description: "",
   };
+
+  const getProgressInfo = () => {
+    switch (loadingMethod) {
+      case LOADING_METHODS.SEQUENTIAL:
+        return {
+          current: loadedImageIndex,
+          total: additionalImages.length,
+          label: isRTL ? "טוען תמונות" : "Loading images",
+        };
+      case LOADING_METHODS.BATCH:
+        return {
+          current: loadedBatches,
+          total: totalBatches,
+          label: isRTL ? "טוען חבילות" : "Loading batches",
+        };
+      default:
+        return null;
+    }
+  };
+
+  const progressInfo = getProgressInfo();
 
   return (
     <div className="min-h-screen py-20" dir={isRTL ? "rtl" : "ltr"}>
@@ -315,15 +468,86 @@ export default function Collection() {
           </motion.div>
         </div>
 
+        {/* Loading Method Selector */}
+        <div className="mb-8 flex justify-center">
+          <div className="bg-white rounded-lg p-2 shadow-md">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  setLoadingMethod(LOADING_METHODS.SEQUENTIAL);
+                  setLoadedImageIndex(0);
+                }}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  loadingMethod === LOADING_METHODS.SEQUENTIAL
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {isRTL ? "רציף" : "Sequential"}
+              </button>
+              <button
+                onClick={() => setLoadingMethod(LOADING_METHODS.BATCH)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  loadingMethod === LOADING_METHODS.BATCH
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {isRTL ? "חבילות" : "Batch"}
+              </button>
+              <button
+                onClick={() => setLoadingMethod(LOADING_METHODS.INTERSECTION)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  loadingMethod === LOADING_METHODS.INTERSECTION
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {isRTL ? "גלילה" : "Viewport"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Indicator */}
+        {progressInfo && progressInfo.current < progressInfo.total && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 max-w-md mx-auto"
+          >
+            <div className="text-center mb-2">
+              <div className="text-sm text-gray-600">
+                {progressInfo.label} ({progressInfo.current}/
+                {progressInfo.total})
+              </div>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <motion.div
+                className="bg-primary h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{
+                  width: `${
+                    (progressInfo.current / progressInfo.total) * 100
+                  }%`,
+                }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {/* Header Image */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mb-12 relative"
-        ></motion.div>
+        >
+          {/* Header image content can go here if needed */}
+        </motion.div>
 
-        {/* Masonry Gallery with Sequential Loading */}
+        {/* Masonry Gallery with Enhanced Loading */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -333,54 +557,111 @@ export default function Collection() {
           <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             {isRTL ? "גלריית תמונות" : "Photo Gallery"}
           </h3>
-          
-          {/* Loading Progress Indicator */}
-          {loadedImageIndex < additionalImages.length && (
-            <div className="mb-6 text-center">
-              <div className="text-sm text-gray-600 mb-2">
-                {isRTL ? "טוען תמונות" : "Loading images"} ({loadedImageIndex + 1}/{additionalImages.length})
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 max-w-md mx-auto">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${((loadedImageIndex + 1) / additionalImages.length) * 100}%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-          )}
 
           <StyledImageList variant="masonry" cols={3} gap={16}>
             {additionalImages.map((image, index) => (
               <ImageListItem
                 key={index}
-                onClick={loadedImageIndex > index ? () => setSelectedImage(image) : undefined}
+                onClick={
+                  shouldImageLoad(index) &&
+                  (loadingMethod === LOADING_METHODS.INTERSECTION ||
+                    loadedImageIndex > index)
+                    ? () => setSelectedImage(image)
+                    : undefined
+                }
                 style={{
-                  cursor: loadedImageIndex > index ? "pointer" : "default",
+                  cursor:
+                    shouldImageLoad(index) &&
+                    (loadingMethod === LOADING_METHODS.INTERSECTION ||
+                      loadedImageIndex > index)
+                      ? "pointer"
+                      : "default",
                 }}
               >
                 <SequentialImage
                   src={image}
                   alt={`${collectionTranslatedMeta.title} ${index + 1}`}
-                  onClick={loadedImageIndex > index ? () => setSelectedImage(image) : undefined}
-                  shouldLoad={loadedImageIndex >= index}
-                  onLoad={handleImageLoad}
+                  onClick={
+                    shouldImageLoad(index) &&
+                    (loadingMethod === LOADING_METHODS.INTERSECTION ||
+                      loadedImageIndex > index)
+                      ? () => setSelectedImage(image)
+                      : undefined
+                  }
+                  shouldLoad={shouldImageLoad(index)}
+                  onLoad={
+                    loadingMethod === LOADING_METHODS.SEQUENTIAL
+                      ? handleImageLoad
+                      : undefined
+                  }
+                  index={index}
+                  loadingMethod={loadingMethod}
+                  intersectionOptions={{
+                    threshold: 0.1,
+                    rootMargin: "50px",
+                  }}
                 />
-                {loadedImageIndex > index && (
-                  <ImageOverlay className="overlay">
-                    <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
-                      <ArrowLeft
-                        className={`h-5 w-5 text-white transform ${
-                          isRTL ? "rotate-0" : "rotate-180"
-                        }`}
-                      />
-                    </div>
-                  </ImageOverlay>
-                )}
+                {shouldImageLoad(index) &&
+                  (loadingMethod === LOADING_METHODS.INTERSECTION ||
+                    loadedImageIndex > index) && (
+                    <ImageOverlay className="overlay">
+                      <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                        <ArrowLeft
+                          className={`h-5 w-5 text-white transform ${
+                            isRTL ? "rotate-0" : "rotate-180"
+                          }`}
+                        />
+                      </div>
+                    </ImageOverlay>
+                  )}
               </ImageListItem>
             ))}
           </StyledImageList>
+        </motion.div>
+
+        {/* Loading Statistics */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 text-center"
+        >
+          <div className="inline-flex items-center space-x-6 bg-white rounded-lg p-4 shadow-md">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-500">
+                {loadingMethod === LOADING_METHODS.SEQUENTIAL
+                  ? loadedImageIndex
+                  : loadingMethod === LOADING_METHODS.BATCH
+                  ? loadedBatches * 6
+                  : additionalImages.length}
+              </div>
+              <div className="text-sm text-gray-600">
+                {isRTL ? "נטענו" : "Loaded"}
+              </div>
+            </div>
+            <div className="w-px h-8 bg-gray-300"></div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-700">
+                {additionalImages.length}
+              </div>
+              <div className="text-sm text-gray-600">
+                {isRTL ? "סה״כ" : "Total"}
+              </div>
+            </div>
+            <div className="w-px h-8 bg-gray-300"></div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-500">
+                {loadingMethod === LOADING_METHODS.INTERSECTION
+                  ? "Auto"
+                  : loadingMethod === LOADING_METHODS.BATCH
+                  ? `${6}/${2}s`
+                  : "1x1"}
+              </div>
+              <div className="text-sm text-gray-600">
+                {isRTL ? "שיטה" : "Method"}
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Lightbox */}
@@ -394,7 +675,7 @@ export default function Collection() {
               onClick={() => setSelectedImage(null)}
             >
               <button
-                className={`absolute top-4 text-white hover:text-primary transition-colors ${
+                className={`absolute top-4 text-white hover:text-primary transition-colors z-10 ${
                   isRTL ? "left-4" : "right-4"
                 }`}
                 onClick={() => setSelectedImage(null)}
@@ -438,6 +719,43 @@ export default function Collection() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Method Information Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-16 max-w-4xl mx-auto"
+        >
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+            <h4 className="text-lg font-semibold mb-3 flex items-center">
+              {isRTL ? "מידע על שיטת הטעינה" : "Loading Method Info"}
+            </h4>
+            <div className="text-sm text-gray-700">
+              {loadingMethod === LOADING_METHODS.SEQUENTIAL && (
+                <p>
+                  {isRTL
+                    ? "טעינה רציפה: תמונות נטענות אחת אחרי השנייה בסדר קבוע. אידיאלי לשליטה בעומס השרת ויצירת אנימציות חלקות."
+                    : "Sequential Loading: Images load one after another in a controlled sequence. Ideal for controlling server load and creating smooth loading animations."}
+                </p>
+              )}
+              {loadingMethod === LOADING_METHODS.BATCH && (
+                <p>
+                  {isRTL
+                    ? "טעינה בחבילות: תמונות נטענות בקבוצות של 6 עם השהיה של 2 שניות בין חבילות. מאזן בין ביצועים לחוויית משתמש."
+                    : "Batch Loading: Images load in groups of 6 with a 2-second delay between batches. Balances performance with user experience."}
+                </p>
+              )}
+              {loadingMethod === LOADING_METHODS.INTERSECTION && (
+                <p>
+                  {isRTL
+                    ? "טעינה בגלילה: תמונות נטענות רק כשהן נכנסות לתחום הראייה. מושלם לגלריות גדולות וחיסכון ברוחב פס."
+                    : "Viewport Loading: Images load only when they enter the viewport. Perfect for large galleries and bandwidth conservation."}
+                </p>
+              )}
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
