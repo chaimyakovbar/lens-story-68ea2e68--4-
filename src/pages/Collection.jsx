@@ -384,19 +384,19 @@ export default function Collection() {
 
   // Handle sequential image loading
   const handleImageLoad = useCallback(() => {
-    setLoadedImageIndex((prev) => prev + 1);
-  }, []);
+    setLoadedImageIndex((prev) => Math.min(prev + 2, additionalImages.length));
+  }, [additionalImages.length]);
 
   // Determine if image should load based on method
   const shouldImageLoad = useCallback(
     (index) => {
       switch (loadingMethod) {
         case LOADING_METHODS.SEQUENTIAL:
-          return loadedImageIndex >= index;
+          return index < loadedImageIndex + 2; // Allow 2 images to load at once
         case LOADING_METHODS.BATCH:
           return shouldItemLoad(index);
         case LOADING_METHODS.INTERSECTION:
-          return true; // Intersection observer handles this internally
+          return true;
         default:
           return true;
       }
@@ -626,42 +626,6 @@ export default function Collection() {
           transition={{ delay: 0.5 }}
           className="mt-12 text-center"
         >
-          <div className="inline-flex items-center space-x-6 bg-white rounded-lg p-4 shadow-md">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-500">
-                {loadingMethod === LOADING_METHODS.SEQUENTIAL
-                  ? loadedImageIndex
-                  : loadingMethod === LOADING_METHODS.BATCH
-                  ? loadedBatches * 6
-                  : additionalImages.length}
-              </div>
-              <div className="text-sm text-gray-600">
-                {isRTL ? "נטענו" : "Loaded"}
-              </div>
-            </div>
-            <div className="w-px h-8 bg-gray-300"></div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-700">
-                {additionalImages.length}
-              </div>
-              <div className="text-sm text-gray-600">
-                {isRTL ? "סה״כ" : "Total"}
-              </div>
-            </div>
-            <div className="w-px h-8 bg-gray-300"></div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">
-                {loadingMethod === LOADING_METHODS.INTERSECTION
-                  ? "Auto"
-                  : loadingMethod === LOADING_METHODS.BATCH
-                  ? `${6}/${2}s`
-                  : "1x1"}
-              </div>
-              <div className="text-sm text-gray-600">
-                {isRTL ? "שיטה" : "Method"}
-              </div>
-            </div>
-          </div>
         </motion.div>
 
         {/* Lightbox */}
@@ -721,41 +685,41 @@ export default function Collection() {
         </AnimatePresence>
 
         {/* Method Information Panel */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
           className="mt-16 max-w-4xl mx-auto"
-        >
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+        > */}
+          {/* <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
             <h4 className="text-lg font-semibold mb-3 flex items-center">
               {isRTL ? "מידע על שיטת הטעינה" : "Loading Method Info"}
             </h4>
-            <div className="text-sm text-gray-700">
-              {loadingMethod === LOADING_METHODS.SEQUENTIAL && (
+            <div className="text-sm text-gray-700"> */}
+              {/* {loadingMethod === LOADING_METHODS.SEQUENTIAL && (
                 <p>
                   {isRTL
                     ? "טעינה רציפה: תמונות נטענות אחת אחרי השנייה בסדר קבוע. אידיאלי לשליטה בעומס השרת ויצירת אנימציות חלקות."
                     : "Sequential Loading: Images load one after another in a controlled sequence. Ideal for controlling server load and creating smooth loading animations."}
                 </p>
-              )}
-              {loadingMethod === LOADING_METHODS.BATCH && (
+              )} */}
+              {/* {loadingMethod === LOADING_METHODS.BATCH && (
                 <p>
                   {isRTL
                     ? "טעינה בחבילות: תמונות נטענות בקבוצות של 6 עם השהיה של 2 שניות בין חבילות. מאזן בין ביצועים לחוויית משתמש."
                     : "Batch Loading: Images load in groups of 6 with a 2-second delay between batches. Balances performance with user experience."}
                 </p>
-              )}
-              {loadingMethod === LOADING_METHODS.INTERSECTION && (
+              )} */}
+              {/* {loadingMethod === LOADING_METHODS.INTERSECTION && (
                 <p>
                   {isRTL
                     ? "טעינה בגלילה: תמונות נטענות רק כשהן נכנסות לתחום הראייה. מושלם לגלריות גדולות וחיסכון ברוחב פס."
                     : "Viewport Loading: Images load only when they enter the viewport. Perfect for large galleries and bandwidth conservation."}
                 </p>
-              )}
-            </div>
-          </div>
-        </motion.div>
+              )} */}
+            {/* </div>
+          </div> */}
+        {/* </motion.div> */}
       </div>
     </div>
   );
