@@ -7,6 +7,7 @@ import { portfolioItemsData } from "./Portfolio"; // Using the base data
 import { ImageList, ImageListItem } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useInView } from "react-intersection-observer";
+import PropTypes from "prop-types";
 
 // Styled components for MUI
 const StyledImageList = styled(ImageList)(({ theme }) => ({
@@ -45,7 +46,7 @@ const ImageOverlay = styled("div")({
   justifyContent: "center",
 });
 
-const LazyLoadedImage = ({ src, alt, onClick }) => {
+const LazyLoadedImage = ({ src, alt, onClick, onLoad }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     rootMargin: "50px 0px",
@@ -60,6 +61,7 @@ const LazyLoadedImage = ({ src, alt, onClick }) => {
           onClick={onClick}
           loading="lazy"
           style={{ width: "100%", height: "auto" }}
+          onLoad={onLoad}
         />
       ) : (
         <div
@@ -68,6 +70,80 @@ const LazyLoadedImage = ({ src, alt, onClick }) => {
       )}
     </div>
   );
+};
+
+LazyLoadedImage.propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+  onLoad: PropTypes.func.isRequired,
+};
+
+const SequentialImageLoader = ({ images, onImageClick, isRTL }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleImageLoad = () => {
+    if (currentIndex < images.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
+
+  useEffect(() => {
+    // Reset state when images prop changes
+    setCurrentIndex(0);
+  }, [images]);
+
+  useEffect(() => {
+    if (currentIndex < images.length) {
+      // Trigger loading of next image
+      setCurrentIndex((prev) => prev + 1);
+    }
+  }, [currentIndex, images]);
+
+  return (
+    <StyledImageList variant="masonry" cols={3} gap={16}>
+      {images.map((image, index) => (
+        <ImageListItem key={index} onClick={() => onImageClick(image)}>
+          {index <= currentIndex ? (
+            <LazyLoadedImage
+              src={image}
+              alt={`Gallery image ${index + 1}`}
+              onClick={() => onImageClick(image)}
+              onLoad={handleImageLoad}
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "200px",
+                backgroundColor: "#f3f4f6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div className="animate-pulse">Loading...</div>
+            </div>
+          )}
+          <ImageOverlay className="overlay">
+            <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+              <ArrowLeft
+                className={`h-5 w-5 text-white transform ${
+                  isRTL ? "rotate-0" : "rotate-180"
+                }`}
+              />
+            </div>
+          </ImageOverlay>
+        </ImageListItem>
+      ))}
+    </StyledImageList>
+  );
+};
+
+SequentialImageLoader.propTypes = {
+  images: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onImageClick: PropTypes.func.isRequired,
+  isRTL: PropTypes.bool.isRequired,
 };
 
 // Translations for Collection page
@@ -258,29 +334,11 @@ export default function Collection() {
           <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             {isRTL ? "גלריית תמונות" : "Photo Gallery"}
           </h3>
-          <StyledImageList variant="masonry" cols={3} gap={16}>
-            {additionalImages.map((image, index) => (
-              <ImageListItem
-                key={index}
-                onClick={() => setSelectedImage(image)}
-              >
-                <LazyLoadedImage
-                  src={image}
-                  alt={`${collectionTranslatedMeta.title} ${index + 1}`}
-                  onClick={() => setSelectedImage(image)}
-                />
-                <ImageOverlay className="overlay">
-                  <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
-                    <ArrowLeft
-                      className={`h-5 w-5 text-white transform ${
-                        isRTL ? "rotate-0" : "rotate-180"
-                      }`}
-                    />
-                  </div>
-                </ImageOverlay>
-              </ImageListItem>
-            ))}
-          </StyledImageList>
+          <SequentialImageLoader
+            images={additionalImages}
+            onImageClick={setSelectedImage}
+            isRTL={isRTL}
+          />
         </motion.div>
 
         {/* Lightbox */}
