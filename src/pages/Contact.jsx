@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Phone, Mail, MapPin } from "lucide-react";
+import { Send, Phone, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { sendEmail } from "@/utils/email";
 import { toast } from "sonner";
+import PropTypes from "prop-types";
 
 const pageTranslations = {
   en: {
@@ -26,7 +27,7 @@ const pageTranslations = {
     sendingButton: "Sending...",
     infoTitle: "Contact Information",
     infoSubtitle:
-      "Reach out through any of these channels and we'll respond within 24 hours.",
+      "Reach out through any of these channels and we&apos;ll respond within 24 hours.",
     phone: { title: "Phone", details: "0548005704" },
     email: { title: "Email", details: "8005704@gmail.com" },
     emailSuccess:
@@ -70,11 +71,6 @@ export default function Contact({ lang = "he" }) {
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
 
-  const contactInfo = [
-    { icon: Phone, ...t.phone },
-    { icon: Mail, ...t.email },
-  ];
-
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
@@ -102,7 +98,7 @@ export default function Contact({ lang = "he" }) {
       } else {
         toast.error(t.emailError || "Failed to send email. Please try again.");
       }
-    } catch (error) {
+    } catch {
       toast.error(t.emailError || "An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -248,7 +244,7 @@ export default function Contact({ lang = "he" }) {
               </form>
             </motion.div>
 
-            {/* Contact Information */}
+            {/* Contact Information Buttons */}
             <motion.div
               initial={{ opacity: 0, x: isRTL ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -256,86 +252,27 @@ export default function Contact({ lang = "he" }) {
               className={`space-y-8 ${isRTL ? "md:col-start-1" : ""}`}
             >
               <div>
-                <h2 className="text-3xl font-bold mb-4">{t.infoTitle}</h2>
-                <p className="opacity-80">{t.infoSubtitle}</p>
+                <h2 className="text-3xl font-bold mb-4">Contact Information</h2>
+                <p className="opacity-80">
+                  Reach out through any of these channels and we&apos;ll respond
+                  within 24 hours.
+                </p>
               </div>
-
-              <div
-                className={`space-y-6 ${
-                  isRTL
-                    ? "flex flex-row-reverse justify-end flex-wrap space-y-0 gap-4"
-                    : ""
-                }`}
-                style={
-                  isRTL
-                    ? {
-                        display: "flex",
-                        flexDirection: "row-reverse",
-                        justifyContent: "flex-end",
-                        flexWrap: "wrap",
-                      }
-                    : undefined
-                }
-              >
-                {contactInfo.map((info, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={`p-4 rounded-lg bg-accent ${
-                      isRTL ? "flex-row-reverse" : ""
-                    }`}
-                  >
-                    {info.title.toLowerCase().includes("phone") ? (
-                      <a
-                        href={`tel:${info.details}`}
-                        className={`flex items-end gap-4 w-full px-4 py-2 bg-primary text-black dark:text-white rounded shadow hover:bg-primary/90 transition-colors ${
-                          isRTL ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        <span
-                          className={`p-3 rounded-full bg-primary/10 ${
-                            isRTL ? "order-2" : ""
-                          }`}
-                        >
-                          <info.icon className="h-6 w-6 text-primary" />
-                        </span>
-                        <span
-                          className={`${
-                            isRTL ? "text-right order-1" : "text-left"
-                          }`}
-                        >
-                          <h3 className="font-medium mb-1">{info.title}</h3>
-                          {info.details}
-                        </span>
-                      </a>
-                    ) : (
-                      <a
-                        href={`mailto:${info.details}`}
-                        className={`flex items-end gap-4 w-full px-4 py-2 bg-primary text-black dark:text-white rounded shadow hover:bg-primary/90 transition-colors ${
-                          isRTL ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        <span
-                          className={`p-3 rounded-full bg-primary/10 ${
-                            isRTL ? "order-2" : ""
-                          }`}
-                        >
-                          <info.icon className="h-6 w-6 text-primary" />
-                        </span>
-                        <span
-                          className={`${
-                            isRTL ? "text-right order-1" : "text-left"
-                          }`}
-                        >
-                          <h3 className="font-medium mb-1">{info.title}</h3>
-                          {info.details}
-                        </span>
-                      </a>
-                    )}
-                  </motion.div>
-                ))}
+              <div className="flex flex-row gap-6">
+                <a
+                  href="mailto:8005704@gmail.com"
+                  className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-pink-600 to-red-600 text-white rounded-lg shadow-lg hover:from-pink-700 hover:to-red-700 transition-all font-semibold text-lg"
+                >
+                  <Mail className="h-6 w-6" />
+                  Send Email
+                </a>
+                <a
+                  href="tel:0548005704"
+                  className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow-lg hover:from-green-600 hover:to-green-700 transition-all font-semibold text-lg"
+                >
+                  <Phone className="h-6 w-6" />
+                  Call Now
+                </a>
               </div>
             </motion.div>
           </div>
@@ -344,3 +281,7 @@ export default function Contact({ lang = "he" }) {
     </div>
   );
 }
+
+Contact.propTypes = {
+  lang: PropTypes.string,
+};
