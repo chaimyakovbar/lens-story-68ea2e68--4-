@@ -260,7 +260,23 @@ export default function Contact({ lang = "he" }) {
                 <p className="opacity-80">{t.infoSubtitle}</p>
               </div>
 
-              <div className="space-y-6">
+              <div
+                className={`space-y-6 ${
+                  isRTL
+                    ? "flex flex-row-reverse justify-end flex-wrap space-y-0 gap-4"
+                    : ""
+                }`}
+                style={
+                  isRTL
+                    ? {
+                        display: "flex",
+                        flexDirection: "row-reverse",
+                        justifyContent: "flex-end",
+                        flexWrap: "wrap",
+                      }
+                    : undefined
+                }
+              >
                 {contactInfo.map((info, index) => (
                   <motion.div
                     key={index}

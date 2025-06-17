@@ -4,45 +4,81 @@ import { ArrowLeft, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { portfolioItemsData } from "./Portfolio";
-import { ImageList, ImageListItem } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import Masonry from "react-masonry-css";
 
-// Styled components for MUI
-const StyledImageList = styled(ImageList)(({ theme }) => ({
-  width: "100%",
-  height: "auto",
-  overflow: "hidden",
-  "& .MuiImageListItem-root": {
-    overflow: "hidden",
-    borderRadius: theme.shape.borderRadius,
-    cursor: "pointer",
-    "&:hover": {
-      "& img": {
-        transform: "scale(1.05)",
-      },
-      "& .overlay": {
-        opacity: 1,
-      },
+// Add minimal CSS for react-masonry-css
+const masonryStyles = `
+.masonry-grid {
+  display: flex;
+  margin-left: -8px; /* gutter size offset */
+  width: auto;
+}
+.masonry-grid_column {
+  padding-left: 8px; /* gutter size */
+  background-clip: padding-box;
+}
+.masonry-grid_column > div {
+  margin-bottom: 8px;
+}
+`;
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("masonry-css")
+) {
+  const style = document.createElement("style");
+  style.id = "masonry-css";
+  style.innerHTML = masonryStyles;
+  document.head.appendChild(style);
+}
+
+// Simple CSS classes for the image grid
+const styles = {
+  imageGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "1rem",
+    width: "100%",
+    margin: "0 auto",
+    "@media (max-width: 1024px)": {
+      gridTemplateColumns: "repeat(2, 1fr)",
+    },
+    "@media (max-width: 640px)": {
+      gridTemplateColumns: "1fr",
     },
   },
-  "& img": {
+  imageItem: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "0.5rem",
+    cursor: "pointer",
+    aspectRatio: "1",
+    "&:hover img": {
+      transform: "scale(1.05)",
+    },
+    "&:hover .overlay": {
+      opacity: 1,
+    },
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
     transition: "transform 0.5s ease-in-out",
   },
-}));
-
-const ImageOverlay = styled("div")({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.3)",
-  opacity: 0,
-  transition: "opacity 0.3s ease-in-out",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    opacity: 0,
+    transition: "opacity 0.3s ease-in-out",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+};
 
 // Hook for Intersection Observer
 const useIntersectionObserver = (options = {}) => {
@@ -316,6 +352,25 @@ const pageTranslations = {
   },
 };
 
+// Add this function before the Collection component
+const calculateImageSize = (image, index, totalImages) => {
+  // Get image dimensions
+  const img = new Image();
+  img.src = image;
+
+  // Determine base size based on image orientation
+  const isPortrait = img.height > img.width;
+  const isLandscape = img.width > img.height;
+
+  // Calculate size class based on image orientation and position
+  if (isPortrait) {
+    return "row-span-2"; // Tall images take 2 rows
+  } else if (isLandscape) {
+    return index % 3 === 0 ? "col-span-2" : "col-span-1"; // Every 3rd landscape image is wider
+  }
+  return "col-span-1"; // Square images take 1 column
+};
+
 export default function Collection() {
   const [collection, setCollection] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -468,47 +523,6 @@ export default function Collection() {
           </motion.div>
         </div>
 
-        {/* Loading Method Selector */}
-        <div className="mb-8 flex justify-center">
-          <div className="bg-white rounded-lg p-2 shadow-md">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => {
-                  setLoadingMethod(LOADING_METHODS.SEQUENTIAL);
-                  setLoadedImageIndex(0);
-                }}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  loadingMethod === LOADING_METHODS.SEQUENTIAL
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {isRTL ? "רציף" : "Sequential"}
-              </button>
-              <button
-                onClick={() => setLoadingMethod(LOADING_METHODS.BATCH)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  loadingMethod === LOADING_METHODS.BATCH
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {isRTL ? "חבילות" : "Batch"}
-              </button>
-              <button
-                onClick={() => setLoadingMethod(LOADING_METHODS.INTERSECTION)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  loadingMethod === LOADING_METHODS.INTERSECTION
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {isRTL ? "גלילה" : "Viewport"}
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Progress Indicator */}
         {progressInfo && progressInfo.current < progressInfo.total && (
           <motion.div
@@ -558,65 +572,59 @@ export default function Collection() {
             {isRTL ? "גלריית תמונות" : "Photo Gallery"}
           </h3>
 
-          <StyledImageList variant="masonry" cols={3} gap={16}>
-            {additionalImages.map((image, index) => (
-              <ImageListItem
-                key={index}
-                onClick={
-                  shouldImageLoad(index) &&
-                  (loadingMethod === LOADING_METHODS.INTERSECTION ||
-                    loadedImageIndex > index)
-                    ? () => setSelectedImage(image)
-                    : undefined
-                }
-                style={{
-                  cursor:
-                    shouldImageLoad(index) &&
-                    (loadingMethod === LOADING_METHODS.INTERSECTION ||
-                      loadedImageIndex > index)
-                      ? "pointer"
-                      : "default",
-                }}
-              >
-                <SequentialImage
-                  src={image}
-                  alt={`${collectionTranslatedMeta.title} ${index + 1}`}
-                  onClick={
-                    shouldImageLoad(index) &&
-                    (loadingMethod === LOADING_METHODS.INTERSECTION ||
-                      loadedImageIndex > index)
-                      ? () => setSelectedImage(image)
-                      : undefined
-                  }
-                  shouldLoad={shouldImageLoad(index)}
-                  onLoad={
-                    loadingMethod === LOADING_METHODS.SEQUENTIAL
-                      ? handleImageLoad
-                      : undefined
-                  }
-                  index={index}
-                  loadingMethod={loadingMethod}
-                  intersectionOptions={{
-                    threshold: 0.1,
-                    rootMargin: "50px",
-                  }}
-                />
-                {shouldImageLoad(index) &&
-                  (loadingMethod === LOADING_METHODS.INTERSECTION ||
-                    loadedImageIndex > index) && (
-                    <ImageOverlay className="overlay">
-                      <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
-                        <ArrowLeft
-                          className={`h-5 w-5 text-white transform ${
-                            isRTL ? "rotate-0" : "rotate-180"
-                          }`}
-                        />
-                      </div>
-                    </ImageOverlay>
-                  )}
-              </ImageListItem>
-            ))}
-          </StyledImageList>
+          {/* Masonry breakpoints */}
+          {/**
+           * 3 columns for >= 1024px
+           * 2 columns for >= 640px
+           * 1 column for < 640px
+           */}
+          <Masonry
+            breakpointCols={{
+              default: 3,
+              1024: 2,
+              640: 1,
+            }}
+            className="masonry-grid"
+            columnClassName="masonry-grid_column"
+          >
+            {additionalImages.map((image, index) => {
+              return (
+                <div
+                  key={index}
+                  className="relative overflow-hidden rounded-md cursor-pointer group mb-2"
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <SequentialImage
+                    src={image}
+                    alt={`${collectionTranslatedMeta.title} ${index + 1}`}
+                    onClick={() => setSelectedImage(image)}
+                    shouldLoad={shouldImageLoad(index)}
+                    onLoad={
+                      loadingMethod === LOADING_METHODS.SEQUENTIAL
+                        ? handleImageLoad
+                        : undefined
+                    }
+                    index={index}
+                    loadingMethod={loadingMethod}
+                    intersectionOptions={{
+                      threshold: 0.1,
+                      rootMargin: "50px",
+                    }}
+                    className="w-full h-full object-cover transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                      <ArrowLeft
+                        className={`h-5 w-5 text-white transform ${
+                          isRTL ? "rotate-0" : "rotate-180"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </Masonry>
         </motion.div>
 
         {/* Loading Statistics */}
@@ -625,9 +633,7 @@ export default function Collection() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="mt-12 text-center"
-        >
-        
-        </motion.div>
+        ></motion.div>
 
         {/* Lightbox */}
         <AnimatePresence>
