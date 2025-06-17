@@ -155,8 +155,8 @@ const pageTranslations = {
     ],
   },
   he: {
-    title: "תיק",
-    titleHighlight: "העבודות שלי",
+    title: "",
+    titleHighlight: "הגלריה שלי",
     subtitle:
       "חקרו את האוסף המגוון שלי של עבודות צילום בתחומים וסגנונות שונים.",
     categories: {

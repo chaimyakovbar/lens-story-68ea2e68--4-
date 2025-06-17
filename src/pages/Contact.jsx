@@ -283,25 +283,57 @@ export default function Contact({ lang = "he" }) {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`flex items-end gap-4 p-4 rounded-lg bg-accent ${
+                    className={`p-4 rounded-lg bg-accent ${
                       isRTL ? "flex-row-reverse" : ""
                     }`}
                   >
-                    <div
-                      className={`p-3 rounded-full bg-primary/10 ${
-                        isRTL ? "order-2" : ""
-                      }`}
-                    >
-                      <info.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div
-                      className={`${
-                        isRTL ? "text-right order-1" : "text-left"
-                      }`}
-                    >
-                      <h3 className="font-medium mb-1">{info.title}</h3>
-                      <p className="opacity-80">{info.details}</p>
-                    </div>
+                    {info.title.toLowerCase().includes("phone") ? (
+                      <a
+                        href={`tel:${info.details}`}
+                        className={`flex items-end gap-4 w-full px-4 py-2 bg-primary text-black dark:text-white rounded shadow hover:bg-primary/90 transition-colors ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        <span
+                          className={`p-3 rounded-full bg-primary/10 ${
+                            isRTL ? "order-2" : ""
+                          }`}
+                        >
+                          <info.icon className="h-6 w-6 text-primary" />
+                        </span>
+                        <span
+                          className={`${
+                            isRTL ? "text-right order-1" : "text-left"
+                          }`}
+                        >
+                          <h3 className="font-medium mb-1">{info.title}</h3>
+                          {info.details}
+                        </span>
+                      </a>
+                    ) : (
+                      <a
+                        href={`mailto:${info.details}`}
+                        className={`flex items-end gap-4 w-full px-4 py-2 bg-primary text-black dark:text-white rounded shadow hover:bg-primary/90 transition-colors ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        <span
+                          className={`p-3 rounded-full bg-primary/10 ${
+                            isRTL ? "order-2" : ""
+                          }`}
+                        >
+                          <info.icon className="h-6 w-6 text-primary" />
+                        </span>
+                        <span
+                          className={`${
+                            isRTL ? "text-right order-1" : "text-left"
+                          }`}
+                        >
+                          <h3 className="font-medium mb-1">{info.title}</h3>
+                          {info.details}
+                        </span>
+                      </a>
+                    )}
                   </motion.div>
                 ))}
               </div>

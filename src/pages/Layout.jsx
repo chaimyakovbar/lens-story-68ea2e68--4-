@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useEffect,
   Children,
@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import AccessibilityMenu from "../components/AccessibilityMenu";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 const layoutTranslations = {
   he: {
@@ -41,12 +42,7 @@ const layoutTranslations = {
   },
 };
 
-export default function Layout({
-  children,
-  currentPageName,
-  lang,
-  toggleLanguage,
-}) {
+export default function Layout({ children, lang, toggleLanguage }) {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("appTheme") === "dark";
@@ -106,7 +102,19 @@ export default function Layout({
       } ${lang === "he" ? "font-assistant" : "font-inter"}`} // Using specific font names
       dir={lang === "he" ? "rtl" : "ltr"}
     >
-      <AccessibilityMenu lang={lang} />
+      {/* WhatsApp Floating Button + AccessibilityMenu */}
+      <a
+        href="https://api.whatsapp.com/send?phone=972548005704&text=%D7%90%D7%A0%D7%99+%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F+%D7%91%D7%A6%D7%9C%D7%9D++"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-20 right-4 z-50 p-3 rounded-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg"
+        aria-label="Contact on WhatsApp"
+      >
+        <WhatsAppIcon className="w-6 h-6 text-white" />
+      </a>
+      <div className="fixed bottom-4 right-4 z-50">
+        <AccessibilityMenu lang={lang} />
+      </div>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap');
@@ -406,7 +414,6 @@ export default function Layout({
 
 Layout.propTypes = {
   children: PropTypes.node.isRequired,
-  currentPageName: PropTypes.string.isRequired,
   lang: PropTypes.string.isRequired,
   toggleLanguage: PropTypes.func.isRequired,
 };

@@ -568,9 +568,9 @@ export default function Collection() {
           transition={{ delay: 0.3 }}
           className="mt-16"
         >
-          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+          {/* <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             {isRTL ? "גלריית תמונות" : "Photo Gallery"}
-          </h3>
+          </h3> */}
 
           {/* Masonry breakpoints */}
           {/**

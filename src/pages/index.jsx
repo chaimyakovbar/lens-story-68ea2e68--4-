@@ -10,7 +10,8 @@ import Contact from "./Contact";
 
 import Collection from "./Collection";
 
-import ScrollToTop from "../components/ScrollToTop";
+import ScrollToTop from "../components/ScrollToTop"
+
 
 import {
   BrowserRouter as Router,
