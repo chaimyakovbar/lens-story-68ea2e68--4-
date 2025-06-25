@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import nodemailer from "nodemailer";
+import AWS from "aws-sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -8,16 +9,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Configure AWS S3
+const s3 = new AWS.S3({
+  region: process.env.AWS_REGION || "eu-north-1",
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "levinstein-images";
+
 // CORS configuration for production
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [
-    "http://localhost:5173", // Local development
-    "http://localhost:3000", // Alternative local port
-  ],
+  origin: process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",")
+    : [
+        "http://localhost:5173", // Local development
+        "http://localhost:3000", // Alternative local port
+        "https://www.netanelewen.com", // Production domain
+      ],
   credentials: true,
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
+
+// Log CORS configuration
+console.log("CORS Origins configured:", corsOptions.origin);
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -61,7 +77,7 @@ app.post("/send-email", async (req, res) => {
 
     const info = await transporter.sendMail(mailOptions);
     console.log("Email sent successfully:", info.response);
-    
+
     res.status(200).json({
       success: true,
       message: "Email sent successfully",
@@ -75,7 +91,7 @@ app.post("/send-email", async (req, res) => {
       command: error.command,
       response: error.response,
     });
-    
+
     res.status(500).json({
       success: false,
       message: "Failed to send email",
@@ -84,26 +100,92 @@ app.post("/send-email", async (req, res) => {
   }
 });
 
+// S3 Images endpoint - List images for a specific collection
+app.get("/api/images/:collection", async (req, res) => {
+  const { collection } = req.params;
+
+  if (!collection) {
+    return res.status(400).json({
+      success: false,
+      message: "Collection parameter is required",
+    });
+  }
+
+  try {
+    const params = {
+      Bucket: BUCKET_NAME,
+      Prefix: `assets/${collection}/`,
+      MaxKeys: 1000, // Adjust as needed
+    };
+
+    const data = await s3.listObjectsV2(params).promise();
+
+    // Filter for image files only
+    const imageExtensions = [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".webp",
+      ".JPG",
+      ".JPEG",
+      ".PNG",
+      ".GIF",
+      ".WEBP",
+    ];
+    const images = data.Contents.filter((obj) => {
+      const ext = obj.Key.split(".").pop().toLowerCase();
+      return imageExtensions.includes(`.${ext}`);
+    })
+      .map((obj) => {
+        const filename = obj.Key.split("/").pop();
+        return {
+          filename,
+          url: `https://${BUCKET_NAME}.s3.${
+            process.env.AWS_REGION || "eu-north-1"
+          }.amazonaws.com/${obj.Key}`,
+          size: obj.Size,
+          lastModified: obj.LastModified,
+        };
+      })
+      .sort((a, b) => a.filename.localeCompare(b.filename));
+
+    res.status(200).json({
+      success: true,
+      collection,
+      images,
+      count: images.length,
+    });
+  } catch (error) {
+    console.error("S3 listing error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to list images from S3",
+      error: error.message,
+    });
+  }
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "ok", 
+  res.status(200).json({
+    status: "ok",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development"
+    environment: process.env.NODE_ENV || "development",
   });
 });
 
 // Root endpoint
 app.get("/", (req, res) => {
-  res.status(200).json({ 
+  res.status(200).json({
     message: "Email Server is running",
     endpoints: {
       "POST /send-email": "Send contact form email",
-      "GET /health": "Health check"
-    }
+      "GET /health": "Health check",
+    },
   });
 });
 
 app.listen(PORT, () => {
   console.log(`Email server running on port ${PORT}`);
-}); 
+});

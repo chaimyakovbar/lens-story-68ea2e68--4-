@@ -379,6 +379,7 @@ export default function Collection() {
   const [loadingMethod, setLoadingMethod] = useState(
     LOADING_METHODS.SEQUENTIAL
   );
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -397,6 +398,40 @@ export default function Collection() {
     2000 // 2 second delay between batches
   );
 
+  // Function to fetch images from S3 dynamically
+  const fetchCollectionImages = async (folderPath) => {
+    try {
+      setIsLoadingImages(true);
+      
+      // Use environment variable for API endpoint with fallback
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      console.log('Using API endpoint:', API_BASE_URL);
+      
+      const response = await fetch(
+        `${API_BASE_URL}/api/images/${folderPath}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.images) {
+        console.log(`Loaded ${data.images.length} images for ${folderPath}`);
+        return data.images.map((img) => img.url);
+      } else {
+        console.error("Failed to fetch images:", data.message);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching collection images:", error);
+      return [];
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
   useEffect(() => {
     const foundCollection = portfolioItemsData.find(
       (item) => item.id === collectionId
@@ -408,33 +443,22 @@ export default function Collection() {
     }
     setCollection(foundCollection);
 
-    // Dynamically import all images from the collection's folder
-    const importImages = async () => {
-      try {
-        const imageContext = import.meta.glob("../assets/**/*.{jpg,jpeg,png}", {
-          eager: true,
-        });
-        const folderImages = Object.entries(imageContext)
-          .filter(([path]) => {
-            return path.includes(foundCollection.folderPath);
-          })
-          .map(([path, module]) => {
-            return module.default;
-          });
+    // Fetch images dynamically from S3
+    const loadImages = async () => {
+      const collectionImages = await fetchCollectionImages(
+        foundCollection.folderPath
+      );
 
-        // Filter out the header image if it exists in the folder
-        const filteredImages = folderImages.filter(
-          (img) => img !== foundCollection.image
-        );
+      // Filter out the header image if it exists in the collection
+      const filteredImages = collectionImages.filter(
+        (img) => img !== foundCollection.image
+      );
 
-        setAdditionalImages(filteredImages);
-        setLoadedImageIndex(0); // Reset loading state
-      } catch (error) {
-        console.error("Error loading images:", error);
-      }
+      setAdditionalImages(filteredImages);
+      setLoadedImageIndex(0); // Reset loading state
     };
 
-    importImages();
+    loadImages();
   }, [collectionId, navigate]);
 
   // Handle sequential image loading
@@ -561,71 +585,87 @@ export default function Collection() {
           {/* Header image content can go here if needed */}
         </motion.div>
 
-        {/* Masonry Gallery with Enhanced Loading */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-16"
-        >
-          {/* <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
-            {isRTL ? "גלריית תמונות" : "Photo Gallery"}
-          </h3> */}
-
-          {/* Masonry breakpoints */}
-          {/**
-           * 3 columns for >= 1024px
-           * 2 columns for >= 640px
-           * 1 column for < 640px
-           */}
-          <Masonry
-            breakpointCols={{
-              default: 3,
-              1024: 2,
-              640: 1,
-            }}
-            className="masonry-grid"
-            columnClassName="masonry-grid_column"
+        {/* Loading State for Images */}
+        {isLoadingImages && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
           >
-            {additionalImages.map((image, index) => {
-              return (
-                <div
-                  key={index}
-                  className="relative overflow-hidden rounded-md cursor-pointer group mb-2"
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <SequentialImage
-                    src={image}
-                    alt={`${collectionTranslatedMeta.title} ${index + 1}`}
+            <div className="animate-spin w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">
+              {isRTL ? "טוען תמונות מהשרת..." : "Loading images from server..."}
+            </p>
+          </motion.div>
+        )}
+
+        {/* Masonry Gallery with Enhanced Loading */}
+        {!isLoadingImages && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-16"
+          >
+            {/* <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+              {isRTL ? "גלריית תמונות" : "Photo Gallery"}
+            </h3> */}
+
+            {/* Masonry breakpoints */}
+            {/**
+             * 3 columns for >= 1024px
+             * 2 columns for >= 640px
+             * 1 column for < 640px
+             */}
+            <Masonry
+              breakpointCols={{
+                default: 3,
+                1024: 2,
+                640: 1,
+              }}
+              className="masonry-grid"
+              columnClassName="masonry-grid_column"
+            >
+              {additionalImages.map((image, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="relative overflow-hidden rounded-md cursor-pointer group mb-2"
                     onClick={() => setSelectedImage(image)}
-                    shouldLoad={shouldImageLoad(index)}
-                    onLoad={
-                      loadingMethod === LOADING_METHODS.SEQUENTIAL
-                        ? handleImageLoad
-                        : undefined
-                    }
-                    index={index}
-                    loadingMethod={loadingMethod}
-                    intersectionOptions={{
-                      threshold: 0.1,
-                      rootMargin: "50px",
-                    }}
-                    className="w-full h-full object-cover transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
-                      <ArrowLeft
-                        className={`h-5 w-5 text-white transform ${
-                          isRTL ? "rotate-0" : "rotate-180"
-                        }`}
-                      />
+                  >
+                    <SequentialImage
+                      src={image}
+                      alt={`${collectionTranslatedMeta.title} ${index + 1}`}
+                      onClick={() => setSelectedImage(image)}
+                      shouldLoad={shouldImageLoad(index)}
+                      onLoad={
+                        loadingMethod === LOADING_METHODS.SEQUENTIAL
+                          ? handleImageLoad
+                          : undefined
+                      }
+                      index={index}
+                      loadingMethod={loadingMethod}
+                      intersectionOptions={{
+                        threshold: 0.1,
+                        rootMargin: "50px",
+                      }}
+                      className="w-full h-full object-cover transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                        <ArrowLeft
+                          className={`h-5 w-5 text-white transform ${
+                            isRTL ? "rotate-0" : "rotate-180"
+                          }`}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </Masonry>
-        </motion.div>
+                );
+              })}
+            </Masonry>
+          </motion.div>
+        )}
 
         {/* Loading Statistics */}
         <motion.div

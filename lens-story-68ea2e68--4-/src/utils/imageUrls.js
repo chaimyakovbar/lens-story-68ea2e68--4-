@@ -31,10 +31,6 @@ export const imageUrls = {
   "JV1A2976.jpg": getImageUrl("JV1A2976.jpg"),
   "logoskitza.PNG": getImageUrl("logoskitza.PNG"),
 
-  // Logo images
-  "logoBlack.png": getImageUrl("logoBlack.png"),
-  "logoWhite.png": getImageUrl("logoWhite.png"),
-
   // About page
   "images/face_about.jpg": getImageUrl("images/face_about.jpg"),
 
