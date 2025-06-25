@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "overrides": {
+    "rollup": "^4.9.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.9.0"
+  },
   "resolutions": {
     "rollup": "^4.9.0",
     "@rollup/rollup-linux-x64-gnu": "^4.9.0"
