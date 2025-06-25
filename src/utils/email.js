@@ -1,7 +1,9 @@
 export const sendEmail = async (formData) => {
   try {
+    // Use the standalone email server URL from environment variables
+    const emailServerUrl = import.meta.env.VITE_EMAIL_SERVER_URL || 'http://localhost:3001';
 
-    const response = await fetch("/api/send-email", {
+    const response = await fetch(`${emailServerUrl}/send-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -14,7 +16,6 @@ export const sendEmail = async (formData) => {
         to_name: "Netanel",
       }),
     });
-
 
     if (!response.ok) {
       const errorText = await response.text();
