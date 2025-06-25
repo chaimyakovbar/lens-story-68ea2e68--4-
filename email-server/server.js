@@ -18,47 +18,38 @@ const s3 = new AWS.S3({
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "levinstein-images";
 
-// CORS configuration for production
-const corsOptions = {
-  origin: function (origin, callback) {
+// Simplified CORS configuration for Render
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Define allowed origins
+  const allowedOrigins = [
+    "http://localhost:5173", // Local development
+    "http://localhost:3000", // Alternative local port
+    "https://www.netanelewen.com", // Production domain
+    "https://netanelewen.com", // Production domain without www
+  ];
+
+  // Set CORS headers based on origin
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  } else if (!origin) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    res.header("Access-Control-Allow-Origin", "*");
+  }
 
-    const allowedOrigins = process.env.CORS_ORIGINS
-      ? process.env.CORS_ORIGINS.split(",")
-      : [
-          "http://localhost:5173", // Local development
-          "http://localhost:3000", // Alternative local port
-          "https://www.netanelewen.com", // Production domain
-          "https://netanelewen.com", // Production domain without www
-        ];
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log("CORS blocked origin:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
 
-// Log CORS configuration
-console.log(
-  "CORS Origins configured:",
-  process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(",")
-    : [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://www.netanelewen.com",
-        "https://netanelewen.com",
-      ]
-);
+  next();
+});
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Create reusable transporter object using SMTP transport
@@ -72,21 +63,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Handle preflight OPTIONS request for send-email
-app.options("/send-email", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.status(200).end();
-});
-
 // Email endpoint
 app.post("/send-email", async (req, res) => {
-  // Add explicit CORS headers
-  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
   const { from_name, from_email, message, to_name } = req.body;
 
   // Validate required fields
@@ -147,11 +125,6 @@ app.options("/api/images/:collection", (req, res) => {
 // S3 Images endpoint - List images for a specific collection
 app.get("/api/images/:collection", async (req, res) => {
   const { collection } = req.params;
-
-  // Add explicit CORS headers
-  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (!collection) {
     return res.status(400).json({
