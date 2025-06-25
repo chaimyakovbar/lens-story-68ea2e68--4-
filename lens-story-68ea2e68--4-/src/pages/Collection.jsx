@@ -113,168 +113,23 @@ const useIntersectionObserver = (options = {}) => {
   return { entries, observe, unobserve };
 };
 
-// Enhanced Sequential image loading component with better performance
-const SequentialImage = ({
-  src,
-  alt,
-  onClick,
-  shouldLoad,
-  onLoad,
-  index = 0,
-  loadingMethod = "sequential",
-  intersectionOptions = {},
-}) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isVisible, setIsVisible] = useState(loadingMethod !== "intersection");
-  const elementRef = useRef();
-
-  // Intersection Observer for viewport-based loading
-  const { entries, observe } = useIntersectionObserver({
-    threshold: 0.1,
-    rootMargin: "100px",
-    ...intersectionOptions,
-  });
-
-  // Handle intersection observer
-  useEffect(() => {
-    if (loadingMethod === "intersection" && elementRef.current) {
-      observe(elementRef.current);
-    }
-  }, [observe, loadingMethod]);
-
-  useEffect(() => {
-    if (loadingMethod === "intersection") {
-      const entry = entries.find((e) => e.target === elementRef.current);
-      if (entry && entry.isIntersecting && !isVisible) {
-        setIsVisible(true);
-      }
-    }
-  }, [entries, isVisible, loadingMethod]);
-
-  // Handle image loading
-  useEffect(() => {
-    if (!shouldLoad || !isVisible) return;
-
-    const img = new Image();
-
-    img.onload = () => {
-      setImageLoaded(true);
-      onLoad?.(); // Notify parent that this image has loaded
-    };
-
-    img.onerror = () => {
-      setHasError(true);
-      onLoad?.(); // Still notify parent to continue with next image
-    };
-
-    img.src = src;
-  }, [shouldLoad, isVisible, src, onLoad]);
-
-  // Placeholder component
-  const Placeholder = ({ children }) => (
-    <div
-      ref={elementRef}
-      style={{
-        width: "100%",
-        aspectRatio: "4/3",
-        backgroundColor: "#f3f4f6",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "8px",
-      }}
-    >
-      {children}
-    </div>
-  );
-
-  if (!isVisible || (!shouldLoad && loadingMethod === "sequential")) {
-    return (
-      <Placeholder>
-        <div className="animate-pulse w-8 h-8 bg-gray-300 rounded"></div>
-      </Placeholder>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <Placeholder>
-        <div style={{ color: "#dc2626", backgroundColor: "#fee2e2" }}>
-          Failed to load
-        </div>
-      </Placeholder>
-    );
-  }
-
-  if (!imageLoaded) {
-    return (
-      <Placeholder>
-        <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full"></div>
-      </Placeholder>
-    );
-  }
-
+// Simple fast image component
+const FastImage = ({ src, alt, onClick, index }) => {
   return (
     <motion.img
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{
-        duration: 0.5,
-        delay: loadingMethod === "sequential" ? index * 0.1 : 0,
-        ease: "easeOut",
+        duration: 0.2,
+        delay: index * 0.05,
       }}
       src={src}
       alt={alt}
       onClick={onClick}
-      style={{ width: "100%", height: "auto" }}
+      className="w-full h-full object-cover rounded-md cursor-pointer hover:scale-105 transition-transform duration-300"
+      loading="lazy"
     />
   );
-};
-
-// Loading configuration options
-const LOADING_METHODS = {
-  SEQUENTIAL: "sequential",
-  INTERSECTION: "intersection",
-  BATCH: "batch",
-};
-
-// Batch loading hook
-const useBatchLoading = (items, batchSize = 5, delay = 1000) => {
-  const [loadedBatches, setLoadedBatches] = useState(0);
-
-  const loadNextBatch = useCallback(() => {
-    setLoadedBatches((prev) =>
-      Math.min(prev + 1, Math.ceil(items.length / batchSize))
-    );
-  }, [items.length, batchSize]);
-
-  const shouldItemLoad = useCallback(
-    (index) => {
-      const batchIndex = Math.floor(index / batchSize);
-      return batchIndex < loadedBatches;
-    },
-    [batchSize, loadedBatches]
-  );
-
-  useEffect(() => {
-    if (loadedBatches === 0) {
-      // Load first batch immediately
-      setLoadedBatches(1);
-      return;
-    }
-
-    if (loadedBatches < Math.ceil(items.length / batchSize)) {
-      const timer = setTimeout(loadNextBatch, delay);
-      return () => clearTimeout(timer);
-    }
-  }, [loadedBatches, items.length, batchSize, delay, loadNextBatch]);
-
-  return {
-    shouldItemLoad,
-    loadedBatches,
-    totalBatches: Math.ceil(items.length / batchSize),
-  };
 };
 
 // Translations for Collection page (same as original)
@@ -375,10 +230,6 @@ export default function Collection() {
   const [collection, setCollection] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
-  const [loadedImageIndex, setLoadedImageIndex] = useState(0);
-  const [loadingMethod, setLoadingMethod] = useState(
-    LOADING_METHODS.SEQUENTIAL
-  );
   const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   const navigate = useNavigate();
@@ -390,13 +241,6 @@ export default function Collection() {
 
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
-
-  // Batch loading hook
-  const { shouldItemLoad, loadedBatches, totalBatches } = useBatchLoading(
-    additionalImages,
-    6, // Load 6 images per batch
-    2000 // 2 second delay between batches
-  );
 
   // Function to fetch images from S3 dynamically
   const fetchCollectionImages = async (folderPath) => {
@@ -455,33 +299,10 @@ export default function Collection() {
       );
 
       setAdditionalImages(filteredImages);
-      setLoadedImageIndex(0); // Reset loading state
     };
 
     loadImages();
   }, [collectionId, navigate]);
-
-  // Handle sequential image loading
-  const handleImageLoad = useCallback(() => {
-    setLoadedImageIndex((prev) => prev + 1);
-  }, []);
-
-  // Determine if image should load based on method
-  const shouldImageLoad = useCallback(
-    (index) => {
-      switch (loadingMethod) {
-        case LOADING_METHODS.SEQUENTIAL:
-          return loadedImageIndex >= index;
-        case LOADING_METHODS.BATCH:
-          return shouldItemLoad(index);
-        case LOADING_METHODS.INTERSECTION:
-          return true; // Intersection observer handles this internally
-        default:
-          return true;
-      }
-    },
-    [loadingMethod, loadedImageIndex, shouldItemLoad]
-  );
 
   if (!collection) return null;
 
@@ -492,27 +313,6 @@ export default function Collection() {
     title: collection.id,
     description: "",
   };
-
-  const getProgressInfo = () => {
-    switch (loadingMethod) {
-      case LOADING_METHODS.SEQUENTIAL:
-        return {
-          current: loadedImageIndex,
-          total: additionalImages.length,
-          label: isRTL ? "טוען תמונות" : "Loading images",
-        };
-      case LOADING_METHODS.BATCH:
-        return {
-          current: loadedBatches,
-          total: totalBatches,
-          label: isRTL ? "טוען חבילות" : "Loading batches",
-        };
-      default:
-        return null;
-    }
-  };
-
-  const progressInfo = getProgressInfo();
 
   return (
     <div className="min-h-screen py-20" dir={isRTL ? "rtl" : "ltr"}>
@@ -546,34 +346,6 @@ export default function Collection() {
             </p>
           </motion.div>
         </div>
-
-        {/* Progress Indicator */}
-        {progressInfo && progressInfo.current < progressInfo.total && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 max-w-md mx-auto"
-          >
-            <div className="text-center mb-2">
-              <div className="text-sm text-gray-600">
-                {progressInfo.label} ({progressInfo.current}/
-                {progressInfo.total})
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <motion.div
-                className="bg-primary h-2 rounded-full"
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${
-                    (progressInfo.current / progressInfo.total) * 100
-                  }%`,
-                }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
-            </div>
-          </motion.div>
-        )}
 
         {/* Header Image */}
         <motion.div
@@ -633,23 +405,11 @@ export default function Collection() {
                     className="relative overflow-hidden rounded-md cursor-pointer group mb-2"
                     onClick={() => setSelectedImage(image)}
                   >
-                    <SequentialImage
+                    <FastImage
                       src={image}
                       alt={`${collectionTranslatedMeta.title} ${index + 1}`}
                       onClick={() => setSelectedImage(image)}
-                      shouldLoad={shouldImageLoad(index)}
-                      onLoad={
-                        loadingMethod === LOADING_METHODS.SEQUENTIAL
-                          ? handleImageLoad
-                          : undefined
-                      }
                       index={index}
-                      loadingMethod={loadingMethod}
-                      intersectionOptions={{
-                        threshold: 0.1,
-                        rootMargin: "50px",
-                      }}
-                      className="w-full h-full object-cover transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
