@@ -24,8 +24,9 @@ const corsOptions = {
     ? process.env.CORS_ORIGINS.split(",")
     : [
         "http://localhost:5173", // Local development
-        "http://localhost:3000", // Alternative local port
+        "http://localhost:3001", // Alternative local port
         "https://www.netanelewen.com", // Production domain
+        "https://netanelewen.com", // Production domain without www
       ],
   credentials: true,
   methods: ["GET", "POST", "OPTIONS"],
@@ -103,6 +104,11 @@ app.post("/send-email", async (req, res) => {
 // S3 Images endpoint - List images for a specific collection
 app.get("/api/images/:collection", async (req, res) => {
   const { collection } = req.params;
+
+  // Add explicit CORS headers
+  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (!collection) {
     return res.status(400).json({
