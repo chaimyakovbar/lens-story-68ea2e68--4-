@@ -69,7 +69,7 @@ export const portfolioItemsData = [
     id: "porpusal",
     categoryKey: "porpusal",
     image: img0028,
-    folderPath: "proposal",
+    folderPath: "porpusal",
   },
   {
     id: "engagement",
@@ -102,7 +102,7 @@ const pageTranslations = {
       designs: "Designs",
       business: "Business",
       haircut: "First Haircut",
-      porpusal: "Proposal",
+      porpusal: "proposal",
       engagement: "Engagement",
       torah: "Torah",
     },
@@ -155,17 +155,17 @@ const pageTranslations = {
     ],
   },
   he: {
-    title: "תיק",
-    titleHighlight: "העבודות שלנו",
+    title: "",
+    titleHighlight: "הגלריה שלי",
     subtitle:
-      "חקרו את האוסף המגוון שלנו של עבודות צילום בתחומים וסגנונות שונים.",
+      "חקרו את האוסף המגוון שלי של עבודות צילום בתחומים וסגנונות שונים.",
     categories: {
       All: "הכל",
       wedding: "חתונה",
       "bar-mitzvah": "בר מצווה",
       "bat-mitzvah": "בת מצווה",
       circumcision: "ברית מילה",
-      tefilin: "תפילין",
+      tefilin: "הנחת תפילין",
       designs: "עיצובים",
       business: "אירועים עסקיים",
       haircut: "חלאקה",
@@ -192,7 +192,7 @@ const pageTranslations = {
         description: "שימור רגעים יקרים במשפחה",
       },
       {
-        title: "תפילין",
+        title: "הנחת תפילין",
         description: "תיעוד רגעים רוחניים ביראת כבוד",
       },
       {
@@ -339,32 +339,20 @@ export default function Portfolio({ lang = "en" }) {
                       alt={itemMeta.title}
                       className="w-full h-full object-cover rounded-lg transition-transform duration-500 group-hover:scale-105"
                     />
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute inset-0 bg-black/60 rounded-lg p-6 flex flex-col justify-end"
-                    >
-                      <h3 className="text-2xl font-bold text-white mb-2">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-lg p-6 flex flex-col justify-end">
+                      <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
                         {itemMeta.title}
                       </h3>
-                      <p className="text-gray-300 mb-4">
-                        {itemMeta.description}
-                      </p>
                       <div
                         className={`flex items-center text-primary group-hover:text-white transition-colors ${
                           isRTL ? "flex-row-reverse" : ""
                         }`}
                       >
-                        {!isRTL && (
-                          <ArrowRight className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                        )}
-                        <span>{t.viewCollection}</span>
                         {isRTL && (
                           <ArrowRight className="h-4 w-4 ml-2 group-hover:-translate-x-1 transition-transform transform rotate-180" />
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   </Link>
                 </motion.div>
               );

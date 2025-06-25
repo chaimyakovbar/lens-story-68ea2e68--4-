@@ -21,6 +21,19 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 const baseCollectionsData = [
   { id: "wedding", imageKey: "wedding", images: [img0031] },
   { id: "bar-mitzvah", imageKey: "bar-mitzvah", images: [img0032] },
+  // { id: "bat-mitzvah", imageKey: "bat-mitzvah", images: [img0033] },
+  // { id: "circumcision", imageKey: "circumcision", images: [img0035] },
+  { id: "tefilin", imageKey: "tefilin", images: [img0036] },
+  { id: "designs", imageKey: "designs", images: [img0037] },
+  // { id: "business", imageKey: "business", images: [img0026] },
+  // { id: "haircut", imageKey: "haircut", images: [img0027] },
+  { id: "porpusal", imageKey: "porpusal", images: [img0028] },
+  { id: "engagement", imageKey: "engagement", images: [img0029] },
+  { id: "torah", imageKey: "torah", images: [img0030] },
+];
+const baseCollectionsData2 = [
+  { id: "wedding", imageKey: "wedding", images: [img0031] },
+  { id: "bar-mitzvah", imageKey: "bar-mitzvah", images: [img0032] },
   { id: "bat-mitzvah", imageKey: "bat-mitzvah", images: [img0033] },
   { id: "circumcision", imageKey: "circumcision", images: [img0035] },
   { id: "tefilin", imageKey: "tefilin", images: [img0036] },
@@ -58,7 +71,6 @@ const pageTranslations = {
       "When words become unclear, I shall focus with photographs.",
       "What I like about photographs is that they capture a moment that's gone forever.",
       "A photograph is a secret about a secret. The more it tells you, the less you know.",
-      "Photography is truth. And cinema is truth 24 times per second.",
     ],
     collectionsTitle: "Photography Collections",
     collectionsSubtitle:
@@ -89,13 +101,13 @@ const pageTranslations = {
     footerBuiltBy: "Built by MCD webs",
   },
   he: {
-    heroTitleLine1: "לוכדים רגעים",
+    heroTitleLine1: "לוכד רגעים",
     heroTitleLine2: "שנשארים לנצח",
     heroTitleHighlight: "שנשארים לנצח",
     heroSubtitle:
       "צילום אירועים פרימיום המספר את סיפורכם בכישרון אמנותי ומצוינות טכנית",
     exploreWork: "גלה עוד",
-    bioTitleLine1: "לוכדים את הרגעים",
+    bioTitleLine1: "לוכד את הרגעים",
     bioTitleHighlight: "הבלתי רגילים של החיים",
     bioParagraph1:
       "שלום! אני נתנאל, צלם מקצועי שחי ונושם את העולם הייחודי של הצילום, עם תשוקה עצומה לתפיסת רגעים נדירים ורגשות שלא תמיד קל לתאר במילים. אני מאמין שצילום הוא הרבה מעבר לתמונה יפה – זהו סיפור שלם, חוויות, ואוסף של רגשות שהופכים לרגעים בלתי נשכחים.",
@@ -104,7 +116,7 @@ const pageTranslations = {
     bioParagraph3:
       "עבורי, כל מפגש צילומי הוא ייחודי ומותאם באופן אישי לחלומות ולרצונות שלך. המטרה שלי היא ליצור עבורך תמונות שמספרות את הסיפור שלך, שתוכל להביט בהן ולחוות מחדש את התחושות, הצבעים והריחות של אותם רגעים קסומים.",
     bioParagraph4:
-      "אני כאן כדי ללוות אותך וליצור יחד חוויות משמעותיות – בין אם מדובר באירוע גדול ומרגש, צילומי משפחה אינטימיים, פורטרט אישי שמשקף את האישיות שלך, או כל רגע שתרצה לתפוס ולשמר. יחד, נעשה זאת באווירה נינוחה ונעימה, עם הרבה רגישות והקפדה על הפרטים הקטנים שהופכים כל צילום לאומנות.",
+      "אני כאן כדי ללוות אותך וליצור יחד חוויות משמעותיות – בין אם מדובר באירוע גדול או קטן ובעיקר מרגש, צילומי משפחה, אירוע עיסקי או פורטרט אישי, כל רגע שתרצה לתפוס ולשמר. יחד, נעשה זאת באווירה נינוחה ונעימה, עם הרבה רגישות והקפדה על הפרטים הקטנים שהופכים כל צילום לאומנות.",
     bioParagraph5:
       "אני מזמין אותך לצאת איתי למסע שבו נבנה זיכרונות שישארו איתך לנצח – בואו נצלם את הסיפור שלך, את הרגעים שלך, את החיים שלך.",
     photographerName: "נתנאל, הצלם שלך",
@@ -113,7 +125,6 @@ const pageTranslations = {
       "כשהמילים נעשות לא ברורות, אתמקד בצילומים.",
       "מה שאני אוהב בצילומים זה שהם לוכדים רגע שנעלם לנצח.",
       "צילום הוא סוד על סוד. ככל שהוא מספר לך יותר, אתה יודע פחות.",
-      "צילום הוא אמת. וקולנוע הוא אמת 24 פעמים בשנייה.",
     ],
     collectionsTitle: "אוספי צילום",
     collectionsSubtitle: "חקרו ז'אנרים ואירועים שונים דרך עדשת הביטוי האמנותי",
@@ -122,7 +133,7 @@ const pageTranslations = {
       "bar-mitzvah": { title: "בר מצווה" },
       "bat-mitzvah": { title: "בת מצווה" },
       circumcision: { title: "ברית מילה" },
-      tefilin: { title: "תפילין" },
+      tefilin: { title: "הנחת תפילין" },
       business: { title: "אירועים עסקיים" },
       haircut: { title: "חלאקה" },
       porpusal: { title: "הצעות נישואין" },
@@ -137,7 +148,7 @@ const pageTranslations = {
     ctaSubtitle:
       "בואו ניצור משהו יוצא דופן ביחד. ממפגשים אינטימיים ועד חגיגות מפוארות, אני כאן כדי לתעד את הרגעים המיוחדים שלכם בסטייל ויצירתיות.",
     ctaButton: "צור קשר",
-    footerName: "נתנאל לוינשטיין",
+    footerName: "נתנאל לוונשטיין",
     footerTagline: "מומחה צילום אירועים",
     footerCopyright: "© {year} כל הזכויות שמורות",
     footerBuiltBy: "נבנה על ידי MCD webs",
@@ -166,7 +177,6 @@ export default function Home({ lang }) {
     );
     setAllHeroImages(images);
   }, []);
-
   useEffect(() => {
     if (t && t.quotes && t.quotes.length > 0) {
       setCurrentQuote(t.quotes[0]);
@@ -185,7 +195,6 @@ export default function Home({ lang }) {
     }, 4000);
     return () => clearInterval(interval);
   }, [t]);
-
   useEffect(() => {
     if (allHeroImages.length === 0) return;
     const interval = setInterval(() => {
@@ -201,7 +210,28 @@ export default function Home({ lang }) {
       <div className="relative overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
         {/* Hero Section */}
         <section className="relative h-screen">
+          {/* בלי טישטוש */}
           <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="absolute inset-0 z-0"
+            >
+              {allHeroImages.length > 0 && (
+                <img
+                  src={allHeroImages[currentImageIndex]}
+                  alt="Photography work"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* עם טישטוש */}
+          {/* <AnimatePresence mode="wait">
             <motion.div
               key={currentImageIndex}
               initial={{ opacity: 0, scale: 1.1 }}
@@ -214,15 +244,16 @@ export default function Home({ lang }) {
                 className="absolute inset-0 bg-black/30 z-10"
                 style={{ backdropFilter: "blur(3px)" }}
               />
-              {allHeroImages.length > 0 && (
+                {allHeroImages.length > 0 && (
                 <img
                   src={allHeroImages[currentImageIndex]}
-                  alt="Photography work" // Consider translating alt text if important
+                  alt="Photography work"
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
               )}
             </motion.div>
-          </AnimatePresence>
+          </AnimatePresence> */}
 
           <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-white p-4">
             <motion.div
@@ -231,11 +262,9 @@ export default function Home({ lang }) {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="text-center max-w-5xl mx-auto"
             >
-              <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tighter leading-tight">
+              <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tighter leading-tight text-white">
                 {t.heroTitleLine1} <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
-                  {t.heroTitleHighlight}
-                </span>
+                <span className="text-white">{t.heroTitleHighlight}</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
                 {t.heroSubtitle}
@@ -306,7 +335,7 @@ export default function Home({ lang }) {
                   <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6 text-black dark:text-white">
                     {t.bioTitleLine1}
                     <br />
-                    <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-500">
+                    <span className="italic text-black">
                       {t.bioTitleHighlight}
                     </span>
                   </h2>
@@ -378,9 +407,7 @@ export default function Home({ lang }) {
                 viewport={{ once: true }}
                 className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
               >
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
-                  {t.collectionsTitle}
-                </span>
+                <span className="italic">{t.collectionsTitle}</span>
               </motion.h2>
               <p className="text-lg text-gray-400 max-w-xl mx-auto">
                 {t.collectionsSubtitle}
@@ -388,7 +415,7 @@ export default function Home({ lang }) {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              {baseCollectionsData.map((collection, index) => {
+              {baseCollectionsData2.map((collection, index) => {
                 const translatedCollection = t.collectionItems[
                   collection.imageKey
                 ] || {
@@ -506,7 +533,7 @@ export default function Home({ lang }) {
                   isRTL ? "md:text-right" : "md:text-left"
                 }`}
               >
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
+                <h2 style={{ fontSize: "30px" }} className="italic">
                   {t.footerName}
                 </h2>
                 <p className="text-gray-300 text-lg">{t.footerTagline}</p>

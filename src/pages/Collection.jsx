@@ -1,50 +1,283 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X } from "lucide-react"; // Removed ArrowRight as it's handled by RTL logic
-import { Link, useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { ArrowLeft, X } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { portfolioItemsData } from "./Portfolio"; // Using the base data
-import { ImageList, ImageListItem } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { portfolioItemsData } from "./Portfolio";
+import Masonry from "react-masonry-css";
 
-// Styled components for MUI
-const StyledImageList = styled(ImageList)(({ theme }) => ({
-  width: "100%",
-  height: "auto",
-  overflow: "hidden",
-  "& .MuiImageListItem-root": {
-    overflow: "hidden",
-    borderRadius: theme.shape.borderRadius,
-    cursor: "pointer",
-    "&:hover": {
-      "& img": {
-        transform: "scale(1.05)",
-      },
-      "& .overlay": {
-        opacity: 1,
-      },
+// Add minimal CSS for react-masonry-css
+const masonryStyles = `
+.masonry-grid {
+  display: flex;
+  margin-left: -8px; /* gutter size offset */
+  width: auto;
+}
+.masonry-grid_column {
+  padding-left: 8px; /* gutter size */
+  background-clip: padding-box;
+}
+.masonry-grid_column > div {
+  margin-bottom: 8px;
+}
+`;
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("masonry-css")
+) {
+  const style = document.createElement("style");
+  style.id = "masonry-css";
+  style.innerHTML = masonryStyles;
+  document.head.appendChild(style);
+}
+
+// Simple CSS classes for the image grid
+const styles = {
+  imageGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "1rem",
+    width: "100%",
+    margin: "0 auto",
+    "@media (max-width: 1024px)": {
+      gridTemplateColumns: "repeat(2, 1fr)",
+    },
+    "@media (max-width: 640px)": {
+      gridTemplateColumns: "1fr",
     },
   },
-  "& img": {
+  imageItem: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "0.5rem",
+    cursor: "pointer",
+    aspectRatio: "1",
+    "&:hover img": {
+      transform: "scale(1.05)",
+    },
+    "&:hover .overlay": {
+      opacity: 1,
+    },
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
     transition: "transform 0.5s ease-in-out",
   },
-}));
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    opacity: 0,
+    transition: "opacity 0.3s ease-in-out",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+};
 
-const ImageOverlay = styled("div")({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.3)",
-  opacity: 0,
-  transition: "opacity 0.3s ease-in-out",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
+// Hook for Intersection Observer
+const useIntersectionObserver = (options = {}) => {
+  const [entries, setEntries] = useState([]);
+  const observer = useRef();
 
-// Translations for Collection page
+  const observe = useCallback(
+    (element) => {
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((observedEntries) => {
+        setEntries(observedEntries);
+      }, options);
+
+      if (element) observer.current.observe(element);
+    },
+    [JSON.stringify(options)]
+  );
+
+  const unobserve = useCallback((element) => {
+    if (observer.current && element) {
+      observer.current.unobserve(element);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, []);
+
+  return { entries, observe, unobserve };
+};
+
+// Enhanced Sequential image loading component with better performance
+const SequentialImage = ({
+  src,
+  alt,
+  onClick,
+  shouldLoad,
+  onLoad,
+  index = 0,
+  loadingMethod = "sequential",
+  intersectionOptions = {},
+}) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isVisible, setIsVisible] = useState(loadingMethod !== "intersection");
+  const elementRef = useRef();
+
+  // Intersection Observer for viewport-based loading
+  const { entries, observe } = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: "100px",
+    ...intersectionOptions,
+  });
+
+  // Handle intersection observer
+  useEffect(() => {
+    if (loadingMethod === "intersection" && elementRef.current) {
+      observe(elementRef.current);
+    }
+  }, [observe, loadingMethod]);
+
+  useEffect(() => {
+    if (loadingMethod === "intersection") {
+      const entry = entries.find((e) => e.target === elementRef.current);
+      if (entry && entry.isIntersecting && !isVisible) {
+        setIsVisible(true);
+      }
+    }
+  }, [entries, isVisible, loadingMethod]);
+
+  // Handle image loading
+  useEffect(() => {
+    if (!shouldLoad || !isVisible) return;
+
+    const img = new Image();
+
+    img.onload = () => {
+      setImageLoaded(true);
+      onLoad?.(); // Notify parent that this image has loaded
+    };
+
+    img.onerror = () => {
+      setHasError(true);
+      onLoad?.(); // Still notify parent to continue with next image
+    };
+
+    img.src = src;
+  }, [shouldLoad, isVisible, src, onLoad]);
+
+  // Placeholder component
+  const Placeholder = ({ children }) => (
+    <div
+      ref={elementRef}
+      style={{
+        width: "100%",
+        aspectRatio: "4/3",
+        backgroundColor: "#f3f4f6",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "8px",
+      }}
+    >
+      {children}
+    </div>
+  );
+
+  if (!isVisible || (!shouldLoad && loadingMethod === "sequential")) {
+    return (
+      <Placeholder>
+        <div className="animate-pulse w-8 h-8 bg-gray-300 rounded"></div>
+      </Placeholder>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <Placeholder>
+        <div style={{ color: "#dc2626", backgroundColor: "#fee2e2" }}>
+          Failed to load
+        </div>
+      </Placeholder>
+    );
+  }
+
+  if (!imageLoaded) {
+    return (
+      <Placeholder>
+        <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full"></div>
+      </Placeholder>
+    );
+  }
+
+  return (
+    <motion.img
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.5,
+        delay: loadingMethod === "sequential" ? index * 0.1 : 0,
+        ease: "easeOut",
+      }}
+      src={src}
+      alt={alt}
+      onClick={onClick}
+      style={{ width: "100%", height: "auto" }}
+    />
+  );
+};
+
+// Loading configuration options
+const LOADING_METHODS = {
+  SEQUENTIAL: "sequential",
+  INTERSECTION: "intersection",
+  BATCH: "batch",
+};
+
+// Batch loading hook
+const useBatchLoading = (items, batchSize = 5, delay = 1000) => {
+  const [loadedBatches, setLoadedBatches] = useState(0);
+
+  const loadNextBatch = useCallback(() => {
+    setLoadedBatches((prev) =>
+      Math.min(prev + 1, Math.ceil(items.length / batchSize))
+    );
+  }, [items.length, batchSize]);
+
+  const shouldItemLoad = useCallback(
+    (index) => {
+      const batchIndex = Math.floor(index / batchSize);
+      return batchIndex < loadedBatches;
+    },
+    [batchSize, loadedBatches]
+  );
+
+  useEffect(() => {
+    if (loadedBatches === 0) {
+      // Load first batch immediately
+      setLoadedBatches(1);
+      return;
+    }
+
+    if (loadedBatches < Math.ceil(items.length / batchSize)) {
+      const timer = setTimeout(loadNextBatch, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [loadedBatches, items.length, batchSize, delay, loadNextBatch]);
+
+  return {
+    shouldItemLoad,
+    loadedBatches,
+    totalBatches: Math.ceil(items.length / batchSize),
+  };
+};
+
+// Translations for Collection page (same as original)
 const pageTranslations = {
   en: {
     backToPortfolio: "Back to Portfolio",
@@ -96,7 +329,7 @@ const pageTranslations = {
     ],
   },
   he: {
-    backToPortfolio: "חזרה לתיק העבודות",
+    backToPortfolio: "חזרה לגלריה",
     portfolioMeta: [
       {
         title: "חתונה",
@@ -105,7 +338,7 @@ const pageTranslations = {
       { title: "בר מצווה", description: "חגיגת אבן דרך משמעותית בסטייל" },
       { title: "בת מצווה", description: "תיעוד חגיגה משמעותית" },
       { title: "ברית מילה", description: "שימור רגעים יקרים במשפחה" },
-      { title: "תפילין", description: "תיעוד רגעים רוחניים ביראת כבוד" },
+      { title: "הנחת תפילין", description: "תיעוד רגעים רוחניים ביראת כבוד" },
       {
         title: "עיצוב",
         description: "הצגת קומפוזיציות אמנותיות ויצירתיות",
@@ -119,19 +352,50 @@ const pageTranslations = {
   },
 };
 
+// Add this function before the Collection component
+const calculateImageSize = (image, index, totalImages) => {
+  // Get image dimensions
+  const img = new Image();
+  img.src = image;
+
+  // Determine base size based on image orientation
+  const isPortrait = img.height > img.width;
+  const isLandscape = img.width > img.height;
+
+  // Calculate size class based on image orientation and position
+  if (isPortrait) {
+    return "row-span-2"; // Tall images take 2 rows
+  } else if (isLandscape) {
+    return index % 3 === 0 ? "col-span-2" : "col-span-1"; // Every 3rd landscape image is wider
+  }
+  return "col-span-1"; // Square images take 1 column
+};
+
 export default function Collection() {
   const [collection, setCollection] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
+  const [loadedImageIndex, setLoadedImageIndex] = useState(0);
+  const [loadingMethod, setLoadingMethod] = useState(
+    LOADING_METHODS.SEQUENTIAL
+  );
+
   const navigate = useNavigate();
-  const location = useLocation(); // For accessing query params
+  const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
   const collectionId = queryParams.get("id");
-  const lang = queryParams.get("lang") || "en"; // Get lang from query param or default
+  const lang = queryParams.get("lang") || "en";
 
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
+
+  // Batch loading hook
+  const { shouldItemLoad, loadedBatches, totalBatches } = useBatchLoading(
+    additionalImages,
+    6, // Load 6 images per batch
+    2000 // 2 second delay between batches
+  );
 
   useEffect(() => {
     const foundCollection = portfolioItemsData.find(
@@ -139,7 +403,7 @@ export default function Collection() {
     );
 
     if (!foundCollection) {
-      navigate(createPageUrl("Portfolio")); // Navigate to portfolio if not found
+      navigate(createPageUrl("Portfolio"));
       return;
     }
     setCollection(foundCollection);
@@ -158,13 +422,13 @@ export default function Collection() {
             return module.default;
           });
 
-
         // Filter out the header image if it exists in the folder
         const filteredImages = folderImages.filter(
           (img) => img !== foundCollection.image
         );
 
         setAdditionalImages(filteredImages);
+        setLoadedImageIndex(0); // Reset loading state
       } catch (error) {
         console.error("Error loading images:", error);
       }
@@ -172,6 +436,28 @@ export default function Collection() {
 
     importImages();
   }, [collectionId, navigate]);
+
+  // Handle sequential image loading
+  const handleImageLoad = useCallback(() => {
+    setLoadedImageIndex((prev) => prev + 1);
+  }, []);
+
+  // Determine if image should load based on method
+  const shouldImageLoad = useCallback(
+    (index) => {
+      switch (loadingMethod) {
+        case LOADING_METHODS.SEQUENTIAL:
+          return loadedImageIndex >= index;
+        case LOADING_METHODS.BATCH:
+          return shouldItemLoad(index);
+        case LOADING_METHODS.INTERSECTION:
+          return true; // Intersection observer handles this internally
+        default:
+          return true;
+      }
+    },
+    [loadingMethod, loadedImageIndex, shouldItemLoad]
+  );
 
   if (!collection) return null;
 
@@ -182,6 +468,27 @@ export default function Collection() {
     title: collection.id,
     description: "",
   };
+
+  const getProgressInfo = () => {
+    switch (loadingMethod) {
+      case LOADING_METHODS.SEQUENTIAL:
+        return {
+          current: loadedImageIndex,
+          total: additionalImages.length,
+          label: isRTL ? "טוען תמונות" : "Loading images",
+        };
+      case LOADING_METHODS.BATCH:
+        return {
+          current: loadedBatches,
+          total: totalBatches,
+          label: isRTL ? "טוען חבילות" : "Loading batches",
+        };
+      default:
+        return null;
+    }
+  };
+
+  const progressInfo = getProgressInfo();
 
   return (
     <div className="min-h-screen py-20" dir={isRTL ? "rtl" : "ltr"}>
@@ -216,48 +523,117 @@ export default function Collection() {
           </motion.div>
         </div>
 
+        {/* Progress Indicator */}
+        {progressInfo && progressInfo.current < progressInfo.total && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 max-w-md mx-auto"
+          >
+            <div className="text-center mb-2">
+              <div className="text-sm text-gray-600">
+                {progressInfo.label} ({progressInfo.current}/
+                {progressInfo.total})
+              </div>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <motion.div
+                className="bg-primary h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{
+                  width: `${
+                    (progressInfo.current / progressInfo.total) * 100
+                  }%`,
+                }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {/* Header Image */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mb-12 relative"
-        ></motion.div>
-        {/* Masonry Gallery */}
+        >
+          {/* Header image content can go here if needed */}
+        </motion.div>
+
+        {/* Masonry Gallery with Enhanced Loading */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
           className="mt-16"
         >
-          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
+          {/* <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             {isRTL ? "גלריית תמונות" : "Photo Gallery"}
-          </h3>
-          <StyledImageList variant="masonry" cols={3} gap={16}>
-            {additionalImages.map((image, index) => (
-              <ImageListItem
-                key={index}
-                onClick={() => setSelectedImage(image)}
-              >
-                <img
-                  src={image}
-                  alt={`${collectionTranslatedMeta.title} ${index + 1}`}
-                  loading="lazy"
-                  style={{ width: "100%", height: "auto" }}
-                />
-                <ImageOverlay className="overlay">
-                  <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
-                    <ArrowLeft
-                      className={`h-5 w-5 text-white transform ${
-                        isRTL ? "rotate-0" : "rotate-180"
-                      }`}
-                    />
+          </h3> */}
+
+          {/* Masonry breakpoints */}
+          {/**
+           * 3 columns for >= 1024px
+           * 2 columns for >= 640px
+           * 1 column for < 640px
+           */}
+          <Masonry
+            breakpointCols={{
+              default: 3,
+              1024: 2,
+              640: 1,
+            }}
+            className="masonry-grid"
+            columnClassName="masonry-grid_column"
+          >
+            {additionalImages.map((image, index) => {
+              return (
+                <div
+                  key={index}
+                  className="relative overflow-hidden rounded-md cursor-pointer group mb-2"
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <SequentialImage
+                    src={image}
+                    alt={`${collectionTranslatedMeta.title} ${index + 1}`}
+                    onClick={() => setSelectedImage(image)}
+                    shouldLoad={shouldImageLoad(index)}
+                    onLoad={
+                      loadingMethod === LOADING_METHODS.SEQUENTIAL
+                        ? handleImageLoad
+                        : undefined
+                    }
+                    index={index}
+                    loadingMethod={loadingMethod}
+                    intersectionOptions={{
+                      threshold: 0.1,
+                      rootMargin: "50px",
+                    }}
+                    className="w-full h-full object-cover transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                      <ArrowLeft
+                        className={`h-5 w-5 text-white transform ${
+                          isRTL ? "rotate-0" : "rotate-180"
+                        }`}
+                      />
+                    </div>
                   </div>
-                </ImageOverlay>
-              </ImageListItem>
-            ))}
-          </StyledImageList>
+                </div>
+              );
+            })}
+          </Masonry>
         </motion.div>
+
+        {/* Loading Statistics */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 text-center"
+        ></motion.div>
 
         {/* Lightbox */}
         <AnimatePresence>
@@ -266,11 +642,11 @@ export default function Collection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4" // Increased z-index
+              className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
               onClick={() => setSelectedImage(null)}
             >
               <button
-                className={`absolute top-4 text-white hover:text-primary transition-colors ${
+                className={`absolute top-4 text-white hover:text-primary transition-colors z-10 ${
                   isRTL ? "left-4" : "right-4"
                 }`}
                 onClick={() => setSelectedImage(null)}
@@ -286,7 +662,7 @@ export default function Collection() {
                 src={selectedImage}
                 alt="Selected"
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
+                onClick={(e) => e.stopPropagation()}
               />
 
               {/* Navigation dots for lightbox */}
