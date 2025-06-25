@@ -1,7 +1,9 @@
 export const sendEmail = async (formData) => {
   try {
-    // Use the standalone email server URL from environment variables
-    const emailServerUrl = import.meta.env.VITE_EMAIL_SERVER_URL || 'http://localhost:3001';
+    // Use the same environment variable as Collection component with production fallback
+    const emailServerUrl =
+      import.meta.env.VITE_API_BASE_URL ||
+      "https://lens-story-68ea2e68-4.onrender.com";
 
     const response = await fetch(`${emailServerUrl}/send-email`, {
       method: "POST",

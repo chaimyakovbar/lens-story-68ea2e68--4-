@@ -52,6 +52,11 @@ const transporter = nodemailer.createTransport({
 
 // Email endpoint
 app.post("/send-email", async (req, res) => {
+  // Add explicit CORS headers
+  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   const { from_name, from_email, message, to_name } = req.body;
 
   // Validate required fields
