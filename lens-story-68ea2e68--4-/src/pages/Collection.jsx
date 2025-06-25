@@ -402,21 +402,21 @@ export default function Collection() {
   const fetchCollectionImages = async (folderPath) => {
     try {
       setIsLoadingImages(true);
-      
-      // Use environment variable for API endpoint with fallback
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
-      console.log('Using API endpoint:', API_BASE_URL);
-      
-      const response = await fetch(
-        `${API_BASE_URL}/api/images/${folderPath}`
-      );
-      
+
+      // Use environment variable for API endpoint with production fallback
+      const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL ||
+        "https://lens-story-68ea2e68-4.onrender.com";
+      console.log("Using API endpoint:", API_BASE_URL);
+
+      const response = await fetch(`${API_BASE_URL}/api/images/${folderPath}`);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.images) {
         console.log(`Loaded ${data.images.length} images for ${folderPath}`);
         return data.images.map((img) => img.url);
