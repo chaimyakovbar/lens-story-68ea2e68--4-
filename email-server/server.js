@@ -20,21 +20,43 @@ const BUCKET_NAME = process.env.S3_BUCKET_NAME || "levinstein-images";
 
 // CORS configuration for production
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(",")
-    : [
-        "http://localhost:5173", // Local development
-        "http://localhost:3001", // Alternative local port
-        "https://www.netanelewen.com", // Production domain
-        "https://netanelewen.com", // Production domain without www
-      ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(",")
+      : [
+          "http://localhost:5173", // Local development
+          "http://localhost:3000", // Alternative local port
+          "https://www.netanelewen.com", // Production domain
+          "https://netanelewen.com", // Production domain without www
+        ];
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log("CORS blocked origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 // Log CORS configuration
-console.log("CORS Origins configured:", corsOptions.origin);
+console.log(
+  "CORS Origins configured:",
+  process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",")
+    : [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://www.netanelewen.com",
+        "https://netanelewen.com",
+      ]
+);
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -48,6 +70,14 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
+});
+
+// Handle preflight OPTIONS request for send-email
+app.options("/send-email", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.status(200).end();
 });
 
 // Email endpoint
@@ -104,6 +134,14 @@ app.post("/send-email", async (req, res) => {
       error: error.message,
     });
   }
+});
+
+// Handle preflight OPTIONS request for images API
+app.options("/api/images/:collection", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://www.netanelewen.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.status(200).end();
 });
 
 // S3 Images endpoint - List images for a specific collection
