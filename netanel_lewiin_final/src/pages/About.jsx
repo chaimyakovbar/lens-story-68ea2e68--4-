@@ -9,9 +9,9 @@ const pageTranslations = {
     pageSubtitle:
       "Capturing life's precious moments through the lens of creativity",
     stats: [
-      { value: "250+", label: "Photo Sessions" },
+      { value: "950+", label: "Photo Sessions" },
       { value: "5+", label: "Years Experience" },
-      { value: "100+", label: "Happy Clients" },
+      { value: "500+", label: "Happy Clients" },
     ],
     storyTitle: "Our Story",
     storyParagraph1:
@@ -29,9 +29,9 @@ const pageTranslations = {
     pageTitle: "אודותי",
     pageSubtitle: "לוכד את רגעי החיים היקרים דרך עדשת היצירתיות",
     stats: [
-      { value: "250+", label: "סשנים של צילום" },
+      { value: "950+", label: "סשנים של צילום" },
       { value: "5+", label: "שנות ניסיון" },
-      { value: "100+", label: "לקוחות מרוצים" },
+      { value: "500+", label: "לקוחות מרוצים" },
     ],
     storyTitle: "הסיפור שלי",
     storyParagraph1:
