@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { portfolioItemsData } from "./Portfolio";
 import Masonry from "react-masonry-css";
+import { getGalleryImages } from "../utils/imageUrls";
 
 // Add minimal CSS for react-masonry-css
 const masonryStyles = `
@@ -113,22 +114,64 @@ const useIntersectionObserver = (options = {}) => {
   return { entries, observe, unobserve };
 };
 
-// Simple fast image component
-const FastImage = ({ src, alt, onClick, index }) => {
+// Light (WebP) photo for the grid; width/height reserve space so the layout doesn't jump
+const FastImage = ({ image, alt, onClick, index }) => {
   return (
     <motion.img
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
-        duration: 0.2,
-        delay: index * 0.05,
+        duration: 0.3,
+        delay: Math.min(index, 8) * 0.05,
       }}
-      src={src}
+      src={image.src}
+      width={image.width}
+      height={image.height}
       alt={alt}
       onClick={onClick}
-      className="w-full h-full object-cover rounded-md cursor-pointer hover:scale-105 transition-transform duration-300"
-      loading="lazy"
+      className="w-full h-auto rounded-md cursor-pointer hover:scale-105 transition-transform duration-300"
+      loading={index < 6 ? "eager" : "lazy"}
+      decoding="async"
     />
+  );
+};
+
+// Lightbox photo: shows the light version instantly, then swaps in the
+// full-quality original once it has downloaded.
+const LightboxImage = ({ image, onClick }) => {
+  const [loadedOriginal, setLoadedOriginal] = useState(null);
+  const [failedOriginal, setFailedOriginal] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => !cancelled && setLoadedOriginal(image.original);
+    img.onerror = () => !cancelled && setFailedOriginal(image.original);
+    img.src = image.original;
+    return () => {
+      cancelled = true;
+    };
+  }, [image.original]);
+
+  const showOriginal = loadedOriginal === image.original;
+
+  return (
+    <div className="relative" onClick={onClick}>
+      <motion.img
+        key={image.src}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        src={showOriginal ? image.original : image.src}
+        width={image.width}
+        height={image.height}
+        alt="Selected"
+        className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg"
+      />
+      {!showOriginal && failedOriginal !== image.original && (
+        <div className="absolute top-3 left-3 w-6 h-6 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+      )}
+    </div>
   );
 };
 
@@ -228,9 +271,7 @@ const calculateImageSize = (image, index, totalImages) => {
 
 export default function Collection() {
   const [collection, setCollection] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [additionalImages, setAdditionalImages] = useState([]);
-  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -242,39 +283,30 @@ export default function Collection() {
   const t = pageTranslations[lang];
   const isRTL = lang === "he";
 
-  // Function to fetch images from S3 dynamically
-  const fetchCollectionImages = async (folderPath) => {
-    try {
-      setIsLoadingImages(true);
+  // Photo list ships with the site (src/data/gallery.json) - no server round-trip
+  const additionalImages = useMemo(
+    () => (collection ? getGalleryImages(collection.folderPath) : []),
+    [collection]
+  );
+  const selectedImage =
+    selectedIndex === null ? null : additionalImages[selectedIndex];
+  const closeLightbox = () => setSelectedIndex(null);
+  const showNext = (step) =>
+    setSelectedIndex(
+      (i) => (i + step + additionalImages.length) % additionalImages.length
+    );
 
-      // Use environment variable for API endpoint with production fallback
-      const API_BASE_URL =
-        import.meta.env.VITE_API_BASE_URL ||
-        "https://lens-story-68ea2e68-4.onrender.com";
-      console.log("Using API endpoint:", API_BASE_URL);
-
-      const response = await fetch(`${API_BASE_URL}/api/images/${folderPath}`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.images) {
-        console.log(`Loaded ${data.images.length} images for ${folderPath}`);
-        return data.images.map((img) => img.url);
-      } else {
-        console.error("Failed to fetch images:", data.message);
-        return [];
-      }
-    } catch (error) {
-      console.error("Error fetching collection images:", error);
-      return [];
-    } finally {
-      setIsLoadingImages(false);
-    }
-  };
+  // Keyboard: arrows move between photos, Escape closes
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") showNext(isRTL ? -1 : 1);
+      if (e.key === "ArrowLeft") showNext(isRTL ? 1 : -1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedIndex, isRTL, additionalImages.length]);
 
   useEffect(() => {
     const foundCollection = portfolioItemsData.find(
@@ -286,22 +318,6 @@ export default function Collection() {
       return;
     }
     setCollection(foundCollection);
-
-    // Fetch images dynamically from S3
-    const loadImages = async () => {
-      const collectionImages = await fetchCollectionImages(
-        foundCollection.folderPath
-      );
-
-      // Filter out the header image if it exists in the collection
-      const filteredImages = collectionImages.filter(
-        (img) => img !== foundCollection.image
-      );
-
-      setAdditionalImages(filteredImages);
-    };
-
-    loadImages();
   }, [collectionId, navigate]);
 
   if (!collection) return null;
@@ -357,23 +373,8 @@ export default function Collection() {
           {/* Header image content can go here if needed */}
         </motion.div>
 
-        {/* Loading State for Images */}
-        {isLoadingImages && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <div className="animate-spin w-12 h-12 border-4 border-gray-300 border-t-primary rounded-full mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">
-              {isRTL ? "טוען תמונות מהשרת..." : "Loading images from server..."}
-            </p>
-          </motion.div>
-        )}
-
-        {/* Masonry Gallery with Enhanced Loading */}
-        {!isLoadingImages && (
-          <motion.div
+        {/* Masonry Gallery */}
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -401,14 +402,14 @@ export default function Collection() {
               {additionalImages.map((image, index) => {
                 return (
                   <div
-                    key={index}
+                    key={image.src}
                     className="relative overflow-hidden rounded-md cursor-pointer group mb-2"
-                    onClick={() => setSelectedImage(image)}
+                    onClick={() => setSelectedIndex(index)}
                   >
                     <FastImage
-                      src={image}
+                      image={image}
                       alt={`${collectionTranslatedMeta.title} ${index + 1}`}
-                      onClick={() => setSelectedImage(image)}
+                      onClick={() => setSelectedIndex(index)}
                       index={index}
                     />
                     <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -425,15 +426,6 @@ export default function Collection() {
               })}
             </Masonry>
           </motion.div>
-        )}
-
-        {/* Loading Statistics */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-12 text-center"
-        ></motion.div>
 
         {/* Lightbox */}
         <AnimatePresence>
@@ -443,50 +435,53 @@ export default function Collection() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
-              onClick={() => setSelectedImage(null)}
+              onClick={closeLightbox}
             >
               <button
                 className={`absolute top-4 text-white hover:text-primary transition-colors z-10 ${
                   isRTL ? "left-4" : "right-4"
                 }`}
-                onClick={() => setSelectedImage(null)}
+                onClick={closeLightbox}
                 aria-label="Close lightbox"
               >
                 <X className="h-8 w-8" />
               </button>
 
-              <motion.img
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                src={selectedImage}
-                alt="Selected"
-                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              <LightboxImage
+                image={selectedImage}
                 onClick={(e) => e.stopPropagation()}
               />
 
-              {/* Navigation dots for lightbox */}
-              <div
-                className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 ${
-                  isRTL ? "flex-row-reverse" : ""
-                }`}
-              >
-                {additionalImages.map((image, index) => (
+              {additionalImages.length > 1 && (
+                <>
                   <button
-                    key={index}
+                    className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedImage(image);
+                      showNext(isRTL ? 1 : -1);
                     }}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      selectedImage === image
-                        ? "bg-primary"
-                        : "bg-white/50 hover:bg-white/75"
-                    }`}
-                    aria-label={`View image ${index + 1}`}
-                  />
-                ))}
-              </div>
+                    aria-label={isRTL ? "Next image" : "Previous image"}
+                  >
+                    <ChevronLeft className="h-8 w-8" />
+                  </button>
+                  <button
+                    className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      showNext(isRTL ? -1 : 1);
+                    }}
+                    aria-label={isRTL ? "Previous image" : "Next image"}
+                  >
+                    <ChevronRight className="h-8 w-8" />
+                  </button>
+                  <div
+                    dir="ltr"
+                    className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm tabular-nums"
+                  >
+                    {selectedIndex + 1} / {additionalImages.length}
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

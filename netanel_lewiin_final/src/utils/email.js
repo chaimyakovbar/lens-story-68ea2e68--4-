@@ -1,11 +1,7 @@
 export const sendEmail = async (formData) => {
   try {
-    // Use the same environment variable as Collection component with production fallback
-    const emailServerUrl =
-      import.meta.env.VITE_API_BASE_URL ||
-      "https://lens-story-68ea2e68-4.onrender.com";
-
-    const response = await fetch(`${emailServerUrl}/send-email`, {
+    // Vercel Function in /api/send-email.js (same domain as the site)
+    const response = await fetch("/api/send-email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
