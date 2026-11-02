@@ -603,7 +603,7 @@ export default function Home({ lang }) {
               <div className="flex flex-col items-center md:items-end gap-4">
                 <div className="flex gap-4">
                   <a
-                    href="https://www.instagram.com/myisraeliview?igsh=MTh1cHBkaGpnazRscg=="
+                    href="https://www.instagram.com/netanellewenstein.ph/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
